@@ -1,0 +1,251 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Syne", system-ui, -apple-system, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  
+  body {
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    background-color: #f5f1eb;
+    color: #1f1c19;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: "Syne", system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.04em;
+  }
+
+  code, kbd, samp, pre, .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CLAYMORPHISM DESIGN SYSTEM
+   Tactile soft 3D physical surfaces with multi-level depth,
+   organic radii, soft ambient shadows, and specular lip highlights
+   ───────────────────────────────────────────────────────────── */
+
+/* Level 1: Primary Clay Container / Surface */
+.clay-surface {
+  background: linear-gradient(145deg, #ffffff 0%, #faf6f0 100%);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 
+    0 16px 36px -8px rgba(184, 169, 153, 0.28),
+    0 4px 14px -2px rgba(184, 169, 153, 0.16),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -2px 6px 0 rgba(175, 158, 140, 0.12);
+}
+
+/* Level 2: Elevated Clay Card (Projects, Highlights) */
+.clay-card {
+  background: linear-gradient(145deg, #ffffff 0%, #fbf8f3 100%);
+  border-radius: 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 22px 45px -10px rgba(175, 158, 140, 0.32),
+    0 6px 18px -3px rgba(175, 158, 140, 0.18),
+    inset 0 3px 5px 0 rgba(255, 255, 255, 1),
+    inset 0 -3px 8px 0 rgba(170, 150, 130, 0.14);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 28px 55px -10px rgba(170, 150, 130, 0.38),
+    0 10px 24px -4px rgba(170, 150, 130, 0.22),
+    inset 0 3px 5px 0 rgba(255, 255, 255, 1),
+    inset 0 -3px 8px 0 rgba(170, 150, 130, 0.14);
+}
+
+/* Level 3: Tactile Clay Interactive Button (Neutral) */
+.clay-btn {
+  background: linear-gradient(145deg, #ffffff 0%, #f6f1ea 100%);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 
+    0 8px 20px -3px rgba(180, 165, 148, 0.32),
+    0 3px 8px -1px rgba(180, 165, 148, 0.18),
+    inset 0 2px 3px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 4px 0 rgba(170, 150, 130, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-btn:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    0 12px 24px -4px rgba(180, 165, 148, 0.38),
+    0 4px 10px -2px rgba(180, 165, 148, 0.22),
+    inset 0 2px 4px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 5px 0 rgba(170, 150, 130, 0.16);
+}
+
+.clay-btn:active {
+  transform: translateY(1px);
+  box-shadow: 
+    0 3px 8px -2px rgba(180, 165, 148, 0.25),
+    inset 0 2px 4px 0 rgba(170, 150, 130, 0.22),
+    inset 0 -1px 2px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Level 3b: Accent Clay Button (Warm Terracotta / Coral) */
+.clay-btn-accent {
+  background: linear-gradient(145deg, #df6b55 0%, #c4543f 100%);
+  color: #ffffff !important;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    0 10px 24px -4px rgba(196, 84, 63, 0.42),
+    0 4px 10px -2px rgba(196, 84, 63, 0.25),
+    inset 0 2px 3px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 4px 0 rgba(120, 30, 15, 0.3);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-btn-accent:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    0 14px 28px -4px rgba(196, 84, 63, 0.5),
+    0 6px 12px -2px rgba(196, 84, 63, 0.3),
+    inset 0 2px 3px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px 0 rgba(120, 30, 15, 0.3);
+}
+
+.clay-btn-accent:active {
+  transform: translateY(1px);
+  box-shadow: 
+    0 4px 10px -2px rgba(196, 84, 63, 0.35),
+    inset 0 2px 5px 0 rgba(120, 30, 15, 0.4),
+    inset 0 -1px 2px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Level 4: Recessed Clay Well / Inset Input / Telemetry Box */
+.clay-inset {
+  background: #ede7de;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    inset 0 3px 7px 0 rgba(160, 142, 122, 0.25),
+    inset 0 -2px 4px 0 rgba(255, 255, 255, 0.9);
+}
+
+.clay-nav {
+  background: rgba(247, 243, 237, 0.88);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 24px -6px rgba(184, 169, 153, 0.15);
+}
+
+/* Subtle organic clay pill tag */
+.clay-chip {
+  background: linear-gradient(145deg, #ffffff 0%, #f4eee6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 9999px;
+  box-shadow: 
+    0 4px 10px -2px rgba(180, 165, 148, 0.22),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 2px 0 rgba(170, 150, 130, 0.1);
+}
+
+/* Extremely subtle film-grain / noise overlay (pointer-events disabled, zero impact on readability) */
+.film-grain {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 10001;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  animation: grainJitter 8s steps(10) infinite;
+}
+
+@keyframes grainJitter {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2%, -3%); }
+  20% { transform: translate(-4%, 2%); }
+  30% { transform: translate(3%, -2%); }
+  40% { transform: translate(-2%, 4%); }
+  50% { transform: translate(-4%, -2%); }
+  60% { transform: translate(2%, 3%); }
+  70% { transform: translate(3%, 1%); }
+  80% { transform: translate(-2%, -2%); }
+  90% { transform: translate(1%, 2%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .film-grain {
+    animation: none;
+  }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #08080a;
+}
+::-webkit-scrollbar-thumb {
+  background: #202024;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #323238;
+}
+
+/* Text balance and grain utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Minimal fine hairline divider */
+.hairline-b {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.hairline-t {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.hairline-r {
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+}
+.hairline-l {
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ThreeUI UplinkLoader Integration & Layering */
+.shader-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.uplink-loader {
+  background: transparent !important;
+}
+
+.uplink-loader iframe {
+  mix-blend-mode: screen;
+  background: transparent !important;
+  filter: hue-rotate(222deg) saturate(1.85) contrast(1.12);
+}
+
+
