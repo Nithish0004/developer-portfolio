@@ -18,3 +18,7 @@ View your app in AI Studio: https://ai.studio/apps/98a0c747-d220-4c8f-a0d8-d70bf
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Development Update
+
+Continuing to improve the portfolio experience, responsiveness, and interactive UI components.
