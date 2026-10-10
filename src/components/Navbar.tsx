@@ -70,27 +70,28 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div
           className={`flex items-center justify-between px-4 sm:px-6 py-2.5 sm:py-3 transition-all duration-300 rounded-2xl ${
             scrolled
-              ? 'clay-surface shadow-[0_12px_28px_-6px_rgba(180,165,148,0.3)] bg-white/90 backdrop-blur-md border border-white/80'
+              ? 'bg-[#09090b]/85 backdrop-blur-xl border border-white/[0.08] shadow-[0_12px_32px_-6px_rgba(0,0,0,0.8)]'
               : 'bg-transparent'
           }`}
         >
-          {/* Left: Brand Monogram / Identity */}
+          {/* Left: Brand Monogram / Identity (Matching Proposed Redesign) */}
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-            className="group flex items-center gap-2 sm:gap-2.5 text-sm sm:text-base tracking-widest font-display font-bold text-[#1f1c19] uppercase transition-colors shrink-0"
+            className="group flex items-center gap-2.5 sm:gap-3 text-sm sm:text-base font-display font-bold text-[#f4f4f5] uppercase transition-colors shrink-0"
           >
-            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg clay-btn flex items-center justify-center text-xs sm:text-sm font-mono font-black text-[#c4543f]">
+            <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center text-xs sm:text-sm font-display font-black text-[#09090b] shadow-[0_0_15px_rgba(255,255,255,0.2)]">
               N
             </span>
-            <span className="font-display font-extrabold tracking-wider text-[14px] sm:text-base">NITHISH S</span>
+            <span className="font-display font-black tracking-wider text-[15px] sm:text-lg text-white">
+              NITHISH
+            </span>
           </a>
 
           {/* Center: Clean Typography Links with ThreeUI AnimatedTopDock Proximity Spring */}
-          {/* Tablet (md) and Desktop (lg) */}
           <nav
             ref={navRef}
             className="hidden md:flex items-start justify-center gap-1 sm:gap-1.5 lg:gap-2 relative"
@@ -108,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 data-dock-item
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className="relative inline-flex items-center justify-center text-[11px] sm:text-[12px] lg:text-[13px] font-mono tracking-wider lg:tracking-widest text-[#5e5852] font-semibold rounded-full border border-transparent cursor-pointer select-none no-underline transition-colors"
+                className="relative inline-flex items-center justify-center text-[11px] sm:text-[12px] lg:text-[13px] font-mono tracking-wider lg:tracking-widest text-zinc-400 hover:text-white font-medium rounded-full border border-transparent cursor-pointer select-none no-underline transition-colors"
                 style={{
                   height: '34px',
                   padding: '0 14px',
@@ -120,21 +121,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span className="relative z-10 pointer-events-none">{link.label}</span>
                 <span
                   data-dock-indicator
-                  className="absolute bottom-1.5 left-1/2 -translate-x-1/2 h-[1.5px] bg-[#c4543f] rounded-full pointer-events-none transition-all duration-150"
+                  className="absolute bottom-1.5 left-1/2 -translate-x-1/2 h-[1.5px] bg-[#df5035] rounded-full pointer-events-none transition-all duration-150"
                   style={{ width: '0px', opacity: 0 }}
                 />
               </a>
             ))}
           </nav>
 
-          {/* Right: Tactile Clay Status Indicator */}
-          {/* Desktop (>= 1024px): Full text; Tablet (768px-1023px): Compact text to avoid crowding */}
-          <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl clay-inset shrink-0">
+          {/* Right: Status Indicator (Matching Proposed Redesign Pill) */}
+          <div className="hidden md:flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#18181b]/80 border border-white/[0.08] backdrop-blur-md shrink-0 shadow-sm">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#df6b55] opacity-60"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#c4543f]"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#df5035] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#df5035] shadow-[0_0_8px_#df5035]"></span>
             </span>
-            <span className="text-[10px] lg:text-[11px] font-mono tracking-wider text-[#5e5852] whitespace-nowrap select-none uppercase font-semibold">
+            <span className="text-[10px] lg:text-[11px] font-mono tracking-wider text-zinc-300 whitespace-nowrap select-none uppercase font-semibold">
               <span className="hidden lg:inline">{statusText}</span>
               <span className="lg:hidden">AVAILABLE</span>
             </span>
@@ -144,7 +144,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl clay-btn text-[#5e5852] hover:text-[#1f1c19] focus:outline-none cursor-pointer"
+            className="md:hidden p-2 rounded-xl bg-zinc-900 border border-white/10 text-zinc-300 hover:text-white focus:outline-none cursor-pointer"
             aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -162,15 +162,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             transition={{ duration: 0.2 }}
             className="md:hidden max-w-7xl mx-auto px-4 pt-2"
           >
-            <div className="clay-card p-5 bg-white/95 backdrop-blur-md shadow-xl">
+            <div className="p-5 rounded-2xl bg-[#0e0e12]/95 border border-white/10 backdrop-blur-xl shadow-2xl">
               <div className="flex flex-col gap-4">
                 {/* Mobile Availability */}
-                <div className="flex items-center gap-2.5 pb-3 border-b border-[#e5ded4]">
+                <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
                   <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#df6b55] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#c4543f]"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#df5035] opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#df5035] shadow-[0_0_8px_#df5035]"></span>
                   </span>
-                  <span className="text-[10px] font-mono tracking-widest text-[#5e5852] uppercase font-semibold">
+                  <span className="text-[10px] font-mono tracking-widest text-zinc-300 uppercase font-semibold">
                     {statusText}
                   </span>
                 </div>
@@ -182,7 +182,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       key={link.label}
                       href={link.href}
                       onClick={(e) => handleNavClick(e, link.href)}
-                      className="text-xs font-mono tracking-widest text-[#5e5852] hover:text-[#c4543f] py-2.5 px-3.5 rounded-xl hover:bg-[#faf6f0] transition-colors font-semibold flex items-center min-h-[44px]"
+                      className="text-xs font-mono tracking-widest text-zinc-300 hover:text-[#df5035] py-2.5 px-3.5 rounded-xl hover:bg-white/5 transition-colors font-semibold flex items-center min-h-[44px]"
                     >
                       {link.label}
                     </a>

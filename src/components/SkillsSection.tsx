@@ -6,14 +6,14 @@ export const SkillsSection: React.FC = () => {
   const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
 
   return (
-    <section id="skills" className="relative py-24 sm:py-32 md:py-40 px-6 sm:px-8 md:px-12 max-w-7xl mx-auto w-full border-t border-[#e5ded4]">
+    <section id="skills" className="relative py-24 sm:py-32 md:py-40 px-6 sm:px-8 md:px-12 max-w-7xl mx-auto w-full border-t border-white/[0.08]">
       {/* Section Header */}
-      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-[#e5ded4]">
+      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-mono tracking-widest text-[#c4543f] font-bold">03</span>
-          <span className="text-xs font-mono tracking-widest text-[#7a7269] uppercase font-medium">/ CAPABILITIES</span>
+          <span className="text-xs font-mono tracking-widest text-[#df5035] font-bold">03</span>
+          <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">/ CAPABILITIES</span>
         </div>
-        <div className="text-xs font-mono tracking-widest text-[#7a7269] uppercase font-medium">
+        <div className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">
           TECHNICAL STACK
         </div>
       </div>
@@ -28,12 +28,12 @@ export const SkillsSection: React.FC = () => {
           className="flex flex-col md:flex-row md:items-end justify-between gap-6"
         >
           <div>
-            <h2 data-ps className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-[-0.05em] leading-[0.88] text-[#1f1c19] uppercase select-none">
+            <h2 data-ps className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-[-0.05em] leading-[0.88] text-white uppercase select-none">
               SKILLS
             </h2>
           </div>
           <div className="max-w-md">
-            <p data-ps className="text-sm font-sans text-[#5e5852] leading-relaxed text-balance">
+            <p data-ps className="text-sm font-sans text-zinc-400 leading-relaxed text-balance">
               Core technologies, machine learning frameworks, and infrastructure tools applied across software products and academic research.
             </p>
           </div>
@@ -53,11 +53,11 @@ export const SkillsSection: React.FC = () => {
             className="clay-surface p-6 sm:p-7 flex flex-col space-y-5"
           >
             {/* Category Title */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#ede7de]">
-              <h3 className="font-display font-bold text-base text-[#1f1c19] tracking-tight uppercase">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+              <h3 className="font-display font-bold text-base text-white tracking-tight uppercase">
                 {group.category}
               </h3>
-              <span className="font-mono text-xs text-[#8a8175] font-semibold">
+              <span className="font-mono text-xs text-zinc-500 font-semibold">
                 0{groupIdx + 1}
               </span>
             </div>
@@ -74,8 +74,8 @@ export const SkillsSection: React.FC = () => {
                   <span
                     className={`font-sans text-sm transition-all duration-200 ${
                       hoveredSkill === item
-                        ? 'text-[#c4543f] font-semibold translate-x-1'
-                        : 'text-[#5e5852] hover:text-[#1f1c19]'
+                        ? 'text-[#df5035] font-semibold translate-x-1'
+                        : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     {item}
@@ -83,7 +83,7 @@ export const SkillsSection: React.FC = () => {
 
                   {/* Subtle accent indicator on hover */}
                   <span
-                    className={`w-1.5 h-1.5 rounded-full bg-[#c4543f] transition-all duration-200 ${
+                    className={`w-1.5 h-1.5 rounded-full bg-[#df5035] shadow-[0_0_8px_#df5035] transition-all duration-200 ${
                       hoveredSkill === item ? 'opacity-100 scale-100' : 'opacity-0 scale-50'
                     }`}
                   />
@@ -95,7 +95,7 @@ export const SkillsSection: React.FC = () => {
       </div>
 
       {/* Minimal Footer Note */}
-      <div className="mt-14 pt-6 border-t border-[#e5ded4] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] sm:text-xs font-mono text-[#8a8175] uppercase tracking-widest font-medium text-center sm:text-left">
+      <div className="mt-14 pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] sm:text-xs font-mono text-zinc-500 uppercase tracking-widest font-medium text-center sm:text-left">
         <span>ZERO SYNTHETIC BARS</span>
         <span>TESTED ON REAL WORKLOADS</span>
       </div>

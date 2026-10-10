@@ -34,11 +34,11 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
         >
           {/* Top Identifier Row */}
           <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-lg clay-inset flex items-center justify-center font-mono text-xs font-bold text-[#c4543f]">
+            <span className="w-7 h-7 rounded-lg clay-inset flex items-center justify-center font-mono text-xs font-bold text-[#df5035]">
               {project.number}
             </span>
-            <span className="w-6 h-[1.5px] bg-[#ded7cb]" />
-            <span className="font-mono text-xs text-[#8a8175] tracking-widest uppercase font-medium">
+            <span className="w-6 h-[1.5px] bg-white/[0.08]" />
+            <span className="font-mono text-xs text-zinc-500 tracking-widest uppercase font-medium">
               {project.year || '2025'} // SYSTEM
             </span>
           </div>
@@ -47,35 +47,35 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
           <div className="space-y-1.5">
             <h3
               onClick={() => onSelectProject(project)}
-              className="cursor-pointer font-display font-bold text-2xl sm:text-3xl text-[#1f1c19] tracking-[-0.03em] leading-tight hover:text-[#c4543f] transition-colors inline-block"
+              className="cursor-pointer font-display font-bold text-2xl sm:text-3xl text-white tracking-[-0.03em] leading-tight hover:text-[#df5035] transition-colors inline-block"
             >
               {project.name}
             </h3>
             {project.tagline && (
-              <p className="text-sm font-sans text-[#7a7269] font-medium">
+              <p className="text-sm font-sans text-zinc-400 font-medium">
                 {project.tagline}
               </p>
             )}
           </div>
 
           {/* Short Description */}
-          <p className="text-sm sm:text-base font-sans text-[#5e5852] leading-relaxed text-balance">
+          <p className="text-sm sm:text-base font-sans text-zinc-300 leading-relaxed text-balance">
             {project.description}
           </p>
 
           {/* Technologies: Clean unboxed text with dividers (Zero-pill rule) */}
           <div className="pt-2">
-            <span className="block text-[11px] font-mono tracking-widest text-[#8a8175] uppercase pb-2 font-semibold">
+            <span className="block text-[11px] font-mono tracking-widest text-zinc-500 uppercase pb-2 font-semibold">
               TECHNOLOGIES
             </span>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-[#5e5852]">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-zinc-400">
               {project.technologies.map((tech, techIdx) => (
                 <React.Fragment key={tech}>
-                  <span className="hover:text-[#c4543f] transition-colors font-medium">
+                  <span className="hover:text-[#df5035] transition-colors font-medium">
                     {tech}
                   </span>
                   {techIdx < project.technologies.length - 1 && (
-                    <span className="text-[#c4bbb0] select-none">·</span>
+                    <span className="text-zinc-600 select-none">·</span>
                   )}
                 </React.Fragment>
               ))}
@@ -89,12 +89,12 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
                 href={project.githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="clay-btn inline-flex items-center gap-2 text-xs font-mono tracking-widest text-[#5e5852] hover:text-[#1f1c19] uppercase px-4 py-2.5 font-semibold transition-all cursor-pointer"
+                className="clay-btn inline-flex items-center gap-2 text-xs font-mono tracking-widest text-zinc-300 hover:text-white uppercase px-4 py-2.5 font-semibold transition-all cursor-pointer"
                 aria-label={`View ${project.name} on GitHub`}
               >
                 <Github size={14} />
                 <span>CODE</span>
-                <ArrowUpRight size={12} className="text-[#8a8175]" />
+                <ArrowUpRight size={12} className="text-zinc-500" />
               </a>
             )}
 
@@ -114,7 +114,7 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
             <button
               type="button"
               onClick={() => onSelectProject(project)}
-              className="clay-btn inline-flex items-center gap-1.5 text-xs font-mono tracking-widest text-[#7a7269] hover:text-[#1f1c19] uppercase px-3.5 py-2.5 font-semibold cursor-pointer"
+              className="clay-btn inline-flex items-center gap-1.5 text-xs font-mono tracking-widest text-zinc-400 hover:text-white uppercase px-3.5 py-2.5 font-semibold cursor-pointer"
             >
               DETAILS
             </button>
@@ -129,10 +129,10 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
         >
           <div
             onClick={() => onSelectProject(project)}
-            className="group/image relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-2xl border-2 border-white shadow-[0_12px_28px_-6px_rgba(180,165,148,0.3)] bg-[#ede7de] cursor-pointer"
+            className="group/image relative aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10 shadow-[0_20px_45px_-10px_rgba(0,0,0,0.85)] bg-[#0d0d12] cursor-pointer"
           >
             {/* Corner Bracket / Editorial Mark */}
-            <div className="absolute top-4 left-4 z-20 font-mono text-[10px] text-[#5e5852] tracking-widest uppercase bg-white/90 px-2.5 py-1 rounded-lg shadow-sm backdrop-blur-sm font-semibold">
+            <div className="absolute top-4 left-4 z-20 font-mono text-[10px] text-zinc-300 tracking-widest uppercase bg-[#09090c]/85 border border-white/10 px-2.5 py-1 rounded-lg shadow-sm backdrop-blur-md font-semibold">
               FIG. {project.number}
             </div>
 
@@ -148,15 +148,18 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
                 const parent = target.parentElement;
                 if (parent) {
                   parent.classList.add('flex', 'items-center', 'justify-center', 'p-8');
-                  parent.innerHTML = `<span class="font-mono text-xs text-[#8a8175] uppercase tracking-widest font-semibold">${project.name}</span>`;
+                  parent.innerHTML = `<span class="font-mono text-xs text-zinc-500 uppercase tracking-widest font-semibold">${project.name}</span>`;
                 }
               }}
             />
 
+            {/* Dark gradient bottom scrim */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#070709]/75 via-transparent to-transparent pointer-events-none" />
+
             {/* Hover Expand Badge */}
             <div className="absolute bottom-4 right-4 z-20 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-              <span className="clay-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono tracking-widest text-[#1f1c19] uppercase font-semibold">
-                EXPAND <ArrowUpRight size={13} />
+              <span className="clay-btn inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-mono tracking-widest text-white uppercase font-semibold">
+                EXPAND <ArrowUpRight size={13} className="text-[#df5035]" />
               </span>
             </div>
           </div>

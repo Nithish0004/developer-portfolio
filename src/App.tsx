@@ -4,6 +4,7 @@ import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { TransitionSection } from './components/TransitionSection';
 import { AboutSection } from './components/AboutSection';
+import { ParticleReconstructionSection } from './components/ParticleReconstructionSection';
 import { WorkSection } from './components/WorkSection';
 import { SkillsSection } from './components/SkillsSection';
 import { ContactSection } from './components/ContactSection';
@@ -16,7 +17,7 @@ export default function App() {
   const [transitionStage, setTransitionStage] = useState<'loading' | 'revealing' | 'completed'>('loading');
   const [isContentVisible, setIsContentVisible] = useState(false);
 
-  // Initialize ThreeUI ParticleScroll on content elements below Hero
+  // Initialize ThreeUI ParticleScroll on content elements below Hero with Dark Mode Obsidian & Magma Palette
   useEffect(() => {
     if (!isContentVisible) return;
 
@@ -36,9 +37,9 @@ export default function App() {
         settle: 0.24,
         hold: 0.34,
         smoothing: 0.16,
-        tintA: [0.77, 0.33, 0.25], // Terracotta (#c4543f)
-        tintB: [0.93, 0.54, 0.42], // Coral-orange (#df6b55)
-        bg: [0.96, 0.945, 0.92],   // Warm cream (#f5f1eb)
+        tintA: [0.87, 0.31, 0.21], // Magma Crimson (#df5035)
+        tintB: [1.00, 0.40, 0.26], // Bright Magma Orange (#ff6542)
+        bg: [0.027, 0.027, 0.035], // Deep Obsidian (#070709)
       });
     }, 150);
 
@@ -101,7 +102,32 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#f5f1eb] text-[#1f1c19] selection:bg-[#df6b55] selection:text-white font-sans antialiased">
+    <div className="relative min-h-screen w-full bg-[#070709] text-[#f4f4f5] selection:bg-[#df5035] selection:text-white font-sans antialiased">
+      {/* Ambient Volcanic Magma Atmospheric Lighting */}
+      <div className="fixed inset-0 pointer-events-none -z-10 overflow-hidden" aria-hidden="true">
+        {/* Subtle radial magma glow behind mid-page */}
+        <div
+          className="absolute top-[32%] right-[-15%] w-[850px] h-[850px] rounded-full blur-[140px] opacity-20"
+          style={{ background: 'radial-gradient(circle, rgba(223,80,53,0.35) 0%, rgba(184,56,34,0.08) 50%, transparent 75%)' }}
+        />
+        {/* Subtle radial magma glow behind contact area */}
+        <div
+          className="absolute bottom-[8%] left-[-15%] w-[750px] h-[750px] rounded-full blur-[130px] opacity-20"
+          style={{ background: 'radial-gradient(circle, rgba(223,80,53,0.3) 0%, rgba(184,56,34,0.05) 50%, transparent 75%)' }}
+        />
+        {/* Delicate technical grid overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.035]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px),
+              linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)
+            `,
+            backgroundSize: '80px 80px',
+          }}
+        />
+      </div>
+
       {/* 1. Cinematic Loading Screen with Fixed Blackish Background & 7-Section Center Split Reveal */}
       {transitionStage !== 'completed' && (
         <LoadingScreen
@@ -137,17 +163,22 @@ export default function App() {
           {/* 4. About Section */}
           <AboutSection />
 
-          {/* 5. Selected Work Section */}
+          {/* 5. Interactive 3D GPU Particle Reconstruction Visualization Section */}
+          <ParticleReconstructionSection
+            onViewProject={() => scrollToSection('work')}
+          />
+
+          {/* 6. Selected Work Section */}
           <WorkSection projects={sampleProjects} />
 
-          {/* 6. Skills Section */}
+          {/* 7. Skills Section */}
           <SkillsSection />
 
-          {/* 7. Contact Section */}
+          {/* 8. Contact Section */}
           <ContactSection />
         </main>
 
-        {/* 8. Minimal Clay Footer */}
+        {/* 9. Minimal Clay Footer */}
         <Footer />
       </div>
     </div>

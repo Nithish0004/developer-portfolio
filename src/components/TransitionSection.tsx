@@ -15,22 +15,22 @@ export const TransitionSection: React.FC = () => {
   const x3 = useTransform(scrollYProgress, [0, 1], [-25, 25]);
 
   const words = [
-    { text: 'BUILD.', transform: x1, color: 'text-[#1f1c19]' },
-    { text: 'BREAK.', transform: x2, color: 'text-[#8a8175] hover:text-[#c4543f]' },
-    { text: 'REBUILD.', transform: x3, color: 'text-[#1f1c19]' },
+    { text: 'BUILD.', transform: x1, color: 'text-white' },
+    { text: 'BREAK.', transform: x2, color: 'text-zinc-600 hover:text-[#df5035]' },
+    { text: 'REBUILD.', transform: x3, color: 'text-white' },
   ];
 
   return (
     <section
       ref={containerRef}
-      className="relative py-24 sm:py-32 md:py-40 overflow-hidden bg-[#eee8df]/70 border-y border-[#e2dcd2]"
+      className="relative py-24 sm:py-32 md:py-40 overflow-hidden bg-[#0a0a0d] border-y border-white/[0.08]"
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-12 relative z-10">
         {/* Subtle Top Metadata Line */}
-        <div data-ps className="flex items-center justify-between text-xs font-mono tracking-widest text-[#7a7269] uppercase pb-8 sm:pb-12 border-b border-[#ded7cb]">
+        <div data-ps className="flex items-center justify-between text-xs font-mono tracking-widest text-zinc-500 uppercase pb-8 sm:pb-12 border-b border-white/[0.08]">
           <span>00 / PHILOSOPHY</span>
-          <span className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#c4543f]" />
+          <span className="flex items-center gap-2 text-zinc-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#df5035] shadow-[0_0_6px_#df5035]" />
             ITERATIVE SYSTEMS
           </span>
         </div>
@@ -47,7 +47,7 @@ export const TransitionSection: React.FC = () => {
               transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.16, 1, 0.3, 1] }}
               className="flex items-baseline gap-4 sm:gap-8 will-change-[transform,opacity]"
             >
-              <span className="font-mono text-xs sm:text-sm text-[#9a9185] tracking-wider font-semibold">
+              <span className="font-mono text-xs sm:text-sm text-zinc-600 tracking-wider font-semibold">
                 0{idx + 1}
               </span>
               <h2
@@ -61,11 +61,11 @@ export const TransitionSection: React.FC = () => {
         </div>
 
         {/* Bottom Editorial Caption */}
-        <div className="pt-8 sm:pt-12 border-t border-[#ded7cb] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <p data-ps className="max-w-md text-xs sm:text-sm text-[#6e6760] font-sans leading-relaxed">
+        <div className="pt-8 sm:pt-12 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <p data-ps className="max-w-md text-xs sm:text-sm text-zinc-400 font-sans leading-relaxed">
             Engineering resilient software through relentless stress testing, deep curiosity, and architectural refinement.
           </p>
-          <span className="text-[11px] font-mono tracking-widest text-[#8a8175] uppercase font-semibold">
+          <span className="text-[11px] font-mono tracking-widest text-zinc-500 uppercase font-semibold">
             CORE DISCIPLINE
           </span>
         </div>

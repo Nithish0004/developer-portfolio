@@ -7,12 +7,12 @@ export const AboutSection: React.FC = () => {
   return (
     <section id="about" className="relative py-24 sm:py-32 md:py-40 px-6 sm:px-8 md:px-12 max-w-7xl mx-auto w-full">
       {/* Section Header */}
-      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-[#e5ded4]">
+      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
         <div className="flex items-center gap-3">
-          <span className="text-xs font-mono tracking-widest text-[#c4543f] font-bold">01</span>
-          <span className="text-xs font-mono tracking-widest text-[#7a7269] uppercase font-medium">/ PROFILE</span>
+          <span className="text-xs font-mono tracking-widest text-[#df5035] font-bold">01</span>
+          <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">/ PROFILE</span>
         </div>
-        <div className="text-xs font-mono tracking-widest text-[#7a7269] uppercase font-medium">
+        <div className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">
           {personalInfo.metadataTag}
         </div>
       </div>
@@ -27,7 +27,7 @@ export const AboutSection: React.FC = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-50px' }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-[-0.05em] leading-[0.88] text-[#1f1c19] uppercase sticky top-28 select-none"
+            className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-[-0.05em] leading-[0.88] text-white uppercase sticky top-28 select-none"
           >
             ABOUT
           </motion.h2>
@@ -44,12 +44,12 @@ export const AboutSection: React.FC = () => {
             transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="clay-surface p-8 sm:p-10"
           >
-            <p className="font-display text-2xl sm:text-3xl md:text-3.5xl text-[#1f1c19] font-medium leading-snug tracking-tight text-balance">
-              I&apos;m <span className="font-extrabold text-[#c4543f]">Nithish S</span>, an Information Science Engineering student at{' '}
-              <span className="font-semibold text-[#1f1c19]">RV College of Engineering</span>, Bengaluru.
+            <p className="font-display text-2xl sm:text-3xl md:text-3.5xl text-white font-medium leading-snug tracking-tight text-balance">
+              I&apos;m <span className="font-extrabold text-[#df5035]">Nithish S</span>, an Information Science Engineering student at{' '}
+              <span className="font-semibold text-white">RV College of Engineering</span>, Bengaluru.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 text-[#5e5852] font-sans text-base leading-relaxed border-t border-[#ede7de] mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 text-zinc-400 font-sans text-base leading-relaxed border-t border-white/[0.08] mt-6">
               <p>
                 I enjoy building software products, exploring AI/ML, and understanding how systems work underneath the interface.
               </p>
@@ -68,28 +68,28 @@ export const AboutSection: React.FC = () => {
             className="grid grid-cols-1 sm:grid-cols-3 gap-4"
           >
             <div data-ps className="clay-surface p-5">
-              <span className="block text-[11px] font-mono text-[#8a8175] uppercase tracking-widest pb-1 font-semibold">
+              <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
                 DISCIPLINE
               </span>
-              <p className="text-sm font-semibold text-[#1f1c19]">
+              <p className="text-sm font-semibold text-white">
                 Information Science &amp; Eng.
               </p>
             </div>
 
             <div data-ps className="clay-surface p-5">
-              <span className="block text-[11px] font-mono text-[#8a8175] uppercase tracking-widest pb-1 font-semibold">
+              <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
                 INSTITUTION
               </span>
-              <p className="text-sm font-semibold text-[#1f1c19]">
+              <p className="text-sm font-semibold text-white">
                 RV College of Engineering
               </p>
             </div>
 
             <div data-ps className="clay-surface p-5">
-              <span className="block text-[11px] font-mono text-[#8a8175] uppercase tracking-widest pb-1 font-semibold">
+              <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
                 LOCATION
               </span>
-              <p className="text-sm font-semibold text-[#1f1c19]">
+              <p className="text-sm font-semibold text-white">
                 Bengaluru, India
               </p>
             </div>
@@ -99,14 +99,10 @@ export const AboutSection: React.FC = () => {
           <div className="pt-2">
             <a
               href="#contact"
-              onClick={(e) => {
-                e.preventDefault();
-                document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="clay-btn inline-flex items-center justify-center gap-2 text-[11px] sm:text-xs font-mono tracking-wider sm:tracking-widest text-[#5e5852] hover:text-[#1f1c19] uppercase px-4 sm:px-5 py-3 font-semibold cursor-pointer max-w-full text-center"
+              className="inline-flex items-center gap-2 text-xs font-mono tracking-widest text-[#df5035] hover:text-[#ff6542] font-semibold uppercase group transition-colors"
             >
-              <span>INQUIRE FOR COLLABORATION OR ROLES</span>
-              <ArrowUpRight size={14} className="text-[#c4543f]" />
+              <span>INQUIRE ABOUT COLLABORATION</span>
+              <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           </div>
         </div>

@@ -104,13 +104,13 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
         // Right Column: Flagship Project Photography Artwork
         const leftX = Math.max(50, width * 0.08);
 
-        // 1. Category Tagline in Website Accent Red (#c4543f)
-        ctx.fillStyle = '#c4543f';
+        // 1. Category Tagline in Website Accent Magma (#df5035)
+        ctx.fillStyle = '#df5035';
         ctx.font = '600 13px "JetBrains Mono", monospace';
         ctx.fillText('01 // FEATURED ARCHITECTURE', leftX, centerY - 150);
 
-        // 2. Primary Headline in Dark Black (#1f1c19)
-        ctx.fillStyle = '#1f1c19';
+        // 2. Primary Headline in Pure White (#ffffff)
+        ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 44px "Syne", "Plus Jakarta Sans", sans-serif';
         ctx.fillText('DISTRIBUTED SYSTEMS', leftX, centerY - 90);
 
@@ -118,17 +118,17 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
         ctx.fillText('& REAL-TIME TELEMETRY', leftX, centerY - 38);
 
         // 3. Subtitle / Architecture summary
-        ctx.fillStyle = '#5e5852';
+        ctx.fillStyle = '#a1a1aa';
         ctx.font = '500 15px "Plus Jakarta Sans", sans-serif';
         ctx.fillText('High-throughput stream engine with fault-tolerant worker pools', leftX, centerY + 10);
 
         // 4. Engineering Metrics Line
-        ctx.fillStyle = '#c4543f';
+        ctx.fillStyle = '#ff6542';
         ctx.font = '600 12.5px "JetBrains Mono", monospace';
         ctx.fillText('⚡ < 1.2ms LATENCY   •   100K MSG/SEC   •   99.99% RESILIENT', leftX, centerY + 58);
 
         // 5. Tech Stack Badges
-        ctx.fillStyle = '#7a7269';
+        ctx.fillStyle = '#71717a';
         ctx.font = '600 11.5px "JetBrains Mono", monospace';
         ctx.fillText('TYPESCRIPT  //  NODE.JS  //  REDIS  //  DOCKER  //  WEBSOCKETS', leftX, centerY + 96);
 
@@ -142,26 +142,26 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
           ctx.drawImage(image, imgX, imgY, imgW, imgH);
         } else {
           // Fallback colored card while image loads
-          ctx.fillStyle = '#22201d';
+          ctx.fillStyle = '#16161c';
           ctx.fillRect(imgX, imgY, imgW, imgH);
         }
 
         // Draw refined accent border around image frame
-        ctx.strokeStyle = '#c4543f';
+        ctx.strokeStyle = '#df5035';
         ctx.lineWidth = 1.5;
         ctx.strokeRect(imgX, imgY, imgW, imgH);
       } else {
         // Mobile Layout: Compact Stacked Representation
         const startX = 24;
-        ctx.fillStyle = '#c4543f';
+        ctx.fillStyle = '#df5035';
         ctx.font = '600 11px "JetBrains Mono", monospace';
         ctx.fillText('01 // FEATURED ARCHITECTURE', startX, centerY - 170);
 
-        ctx.fillStyle = '#1f1c19';
+        ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 26px "Syne", "Plus Jakarta Sans", sans-serif';
         ctx.fillText('DISTRIBUTED SYSTEMS', startX, centerY - 130);
 
-        ctx.fillStyle = '#5e5852';
+        ctx.fillStyle = '#a1a1aa';
         ctx.font = '500 12px "Plus Jakarta Sans", sans-serif';
         ctx.fillText('High-throughput stream engine & telemetry', startX, centerY - 95);
 
@@ -175,7 +175,7 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
           ctx.drawImage(image, imgX, imgY, imgW, imgH);
         }
 
-        ctx.fillStyle = '#c4543f';
+        ctx.fillStyle = '#ff6542';
         ctx.font = '600 10.5px "JetBrains Mono", monospace';
         ctx.fillText('⚡ < 1.2ms LATENCY  •  100K MSG/S', startX, imgY + imgH + 28);
       }
@@ -200,8 +200,8 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
           const g = imgData[index + 1];
           const b = imgData[index + 2];
 
-          // Skip pure cream background pixels if any bleed occurred
-          if (r > 240 && g > 238 && b > 230 && a < 180) continue;
+          // Skip nearly black canvas pixels if any bleed occurred
+          if (r < 10 && g < 10 && b < 12 && a < 180) continue;
 
           // Target 3D coordinates (centered origin for Orthographic camera)
           const tx = x - width / 2;
@@ -431,28 +431,28 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
   return (
     <section
       ref={trackRef}
-      className="relative w-full h-[220vh] bg-[#f5f1eb] select-none"
+      className="relative w-full h-[220vh] bg-[#070709] select-none"
       aria-label="Scroll-driven particle reconstruction transition"
     >
       {/* ── STICKY VIEWPORT CONTAINER ── */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between py-6 sm:py-8 px-4 sm:px-8 md:px-12 pointer-events-none">
         {/* Top Minimal Telemetry HUD */}
-        <div className="w-full flex items-center justify-between text-xs font-mono tracking-widest text-[#7a7269] uppercase border-b border-[#e5decb] pb-3 z-30">
+        <div className="w-full flex items-center justify-between text-xs font-mono tracking-widest text-zinc-500 uppercase border-b border-white/[0.08] pb-3 z-30">
           <div className="flex items-center gap-2.5">
-            <span className="w-2 h-2 rounded-full bg-[#c4543f] animate-pulse" />
-            <span className="font-semibold text-[#1f1c19]">01 // ARCHITECTURAL REVEAL</span>
+            <span className="w-2 h-2 rounded-full bg-[#df5035] animate-pulse shadow-[0_0_8px_#df5035]" />
+            <span className="font-semibold text-white">01 // ARCHITECTURAL REVEAL</span>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-6 text-[11px] sm:text-xs">
             <span
               ref={stageBadgeRef}
-              className="text-[#8a8175] hidden sm:inline-block font-medium"
+              className="text-zinc-500 hidden sm:inline-block font-medium"
             >
               SCATTERED PARTICLES
             </span>
-            <span className="text-[#1f1c19] font-bold">
+            <span className="text-zinc-300 font-bold">
               RECONSTRUCTION:{' '}
-              <span ref={progressBadgeRef} className="text-[#c4543f]">
+              <span ref={progressBadgeRef} className="text-[#df5035]">
                 0%
               </span>
             </span>
@@ -474,15 +474,15 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
           <div className="w-full grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Column: Reconstructed Typography & Live Controls */}
             <div className="md:col-span-6 flex flex-col justify-center text-left space-y-4">
-              <span className="text-[#c4543f] font-mono text-xs sm:text-sm font-semibold tracking-widest uppercase">
+              <span className="text-[#df5035] font-mono text-xs sm:text-sm font-semibold tracking-widest uppercase">
                 01 // FEATURED ARCHITECTURE
               </span>
 
-              <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-[#1f1c19] tracking-tight leading-[1.05]">
-                Distributed Systems & Real-time Telemetry
+              <h2 className="font-display font-extrabold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.05]">
+                Distributed Systems &amp; Real-time Telemetry
               </h2>
 
-              <p className="text-sm sm:text-base text-[#5e5852] font-sans leading-relaxed">
+              <p className="text-sm sm:text-base text-zinc-300 font-sans leading-relaxed">
                 High-throughput stream processing engine with fault-tolerant worker pools, zero-drop
                 buffering, and live sub-millisecond metrics telemetry.
               </p>
@@ -490,16 +490,16 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
               {/* Engineering Metrics Pills */}
               <div className="grid grid-cols-3 gap-2 sm:gap-3 py-2">
                 <div className="clay-inset p-2.5 rounded-xl text-center">
-                  <div className="text-[10px] font-mono text-[#8a8175] uppercase">Latency</div>
-                  <div className="text-xs sm:text-sm font-mono font-bold text-[#c4543f]">&lt; 1.2ms</div>
+                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Latency</div>
+                  <div className="text-xs sm:text-sm font-mono font-bold text-[#df5035]">&lt; 1.2ms</div>
                 </div>
                 <div className="clay-inset p-2.5 rounded-xl text-center">
-                  <div className="text-[10px] font-mono text-[#8a8175] uppercase">Throughput</div>
-                  <div className="text-xs sm:text-sm font-mono font-bold text-[#1f1c19]">100K msg/s</div>
+                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Throughput</div>
+                  <div className="text-xs sm:text-sm font-mono font-bold text-white">100K msg/s</div>
                 </div>
                 <div className="clay-inset p-2.5 rounded-xl text-center">
-                  <div className="text-[10px] font-mono text-[#8a8175] uppercase">Uptime</div>
-                  <div className="text-xs sm:text-sm font-mono font-bold text-[#1f1c19]">99.99%</div>
+                  <div className="text-[10px] font-mono text-zinc-500 uppercase">Uptime</div>
+                  <div className="text-xs sm:text-sm font-mono font-bold text-white">99.99%</div>
                 </div>
               </div>
 
@@ -508,7 +508,7 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
                 {['TypeScript', 'Node.js', 'Redis', 'Docker', 'WebSockets'].map((tag) => (
                   <span
                     key={tag}
-                    className="text-[10.5px] font-mono font-semibold uppercase px-2.5 py-1 rounded-lg bg-[#e8e2d7] text-[#5e5852]"
+                    className="text-[10.5px] font-mono font-semibold uppercase px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/10 text-zinc-300"
                   >
                     {tag}
                   </span>
@@ -530,17 +530,17 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
 
             {/* Right Column: High-Res Project Preview Card */}
             <div className="md:col-span-6 flex justify-center items-center">
-              <div className="clay-card p-3 sm:p-4 rounded-3xl w-full max-w-lg overflow-hidden border border-white/80 shadow-xl">
-                <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-[#24211d]">
+              <div className="clay-card p-3 sm:p-4 rounded-3xl w-full max-w-lg overflow-hidden border border-white/10 shadow-2xl">
+                <div className="relative aspect-[16/10] rounded-2xl overflow-hidden bg-[#121217]">
                   <img
                     src={projectImgUrl}
                     alt="Distributed Systems & Real-time Telemetry"
                     className="w-full h-full object-cover"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute bottom-3 left-3 flex items-center gap-2 text-[11px] font-mono text-white/90 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
-                    <Activity size={12} className="text-[#df6b55]" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-3 left-3 flex items-center gap-2 text-[11px] font-mono text-white/90 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/20">
+                    <Activity size={12} className="text-[#df5035]" />
                     <span>SYSTEM STREAM ONLINE</span>
                   </div>
                 </div>
@@ -550,9 +550,9 @@ export const ParticleReconstructionSection: React.FC<ParticleReconstructionSecti
         </div>
 
         {/* Bottom Scroll Guide */}
-        <div className="w-full flex items-center justify-between text-[11px] font-mono tracking-widest text-[#8a8175] uppercase border-t border-[#e5decb] pt-3 z-30">
+        <div className="w-full flex items-center justify-between text-[11px] font-mono tracking-widest text-zinc-500 uppercase border-t border-white/[0.08] pt-3 z-30">
           <span className="flex items-center gap-2">
-            <Cpu size={13} className="text-[#c4543f]" />
+            <Cpu size={13} className="text-[#df5035]" />
             <span>GPU PARTICLE SHADER ENGINE</span>
           </span>
 
