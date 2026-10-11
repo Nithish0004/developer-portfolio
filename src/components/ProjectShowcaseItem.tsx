@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { Github, ExternalLink, ArrowUpRight } from 'lucide-react';
 import { Project } from '../types/portfolio';
 
@@ -17,12 +16,8 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
   const isEven = index % 2 === 0;
 
   return (
-    <motion.article
+    <article
       data-ps
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
       className="clay-card p-6 sm:p-8 md:p-10"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -137,7 +132,7 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
             </div>
 
             {/* Image with smooth scale */}
-            <motion.img
+            <img
               src={project.image}
               alt={project.name}
               referrerPolicy="no-referrer"
@@ -165,6 +160,6 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
           </div>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 };

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
 import { personalInfo } from '../data/portfolioData';
 
@@ -7,7 +6,7 @@ export const AboutSection: React.FC = () => {
   return (
     <section id="about" className="relative py-24 sm:py-32 md:py-40 px-6 sm:px-8 md:px-12 max-w-7xl mx-auto w-full">
       {/* Section Header */}
-      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
+      <div data-ps className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
         <div className="flex items-center gap-3">
           <span className="text-xs font-mono tracking-widest text-[#df5035] font-bold">01</span>
           <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">/ PROFILE</span>
@@ -21,27 +20,19 @@ export const AboutSection: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 pt-12 sm:pt-16">
         {/* Left: Huge Heading */}
         <div className="lg:col-span-4">
-          <motion.h2
+          <h2
             data-ps
-            initial={{ opacity: 0, y: 25 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-[-0.05em] leading-[0.88] text-white uppercase sticky top-28 select-none"
+            className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-[-0.05em] leading-[0.88] text-white uppercase select-none"
           >
             ABOUT
-          </motion.h2>
+          </h2>
         </div>
 
         {/* Right: Editorial Typography Prose in Tactile Clay Container */}
         <div className="lg:col-span-8 space-y-8 sm:space-y-10">
           {/* Lead Paragraph in Clay Surface */}
-          <motion.div
+          <div
             data-ps
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
-            transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="clay-surface p-8 sm:p-10"
           >
             <p className="font-display text-2xl sm:text-3xl md:text-3.5xl text-white font-medium leading-snug tracking-tight text-balance">
@@ -57,17 +48,14 @@ export const AboutSection: React.FC = () => {
                 I care about creating projects that are technically interesting, useful and worth putting into the real world.
               </p>
             </div>
-          </motion.div>
+          </div>
 
           {/* Editorial Specs / Metadata Table in Tactile Clay Inset Wells (Zero-Pill Discipline) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-50px' }}
-            transition={{ duration: 0.9, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          <div
+            data-ps
             className="grid grid-cols-1 sm:grid-cols-3 gap-4"
           >
-            <div data-ps className="clay-surface p-5">
+            <div className="clay-surface p-5">
               <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
                 DISCIPLINE
               </span>
@@ -76,7 +64,7 @@ export const AboutSection: React.FC = () => {
               </p>
             </div>
 
-            <div data-ps className="clay-surface p-5">
+            <div className="clay-surface p-5">
               <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
                 INSTITUTION
               </span>
@@ -85,7 +73,7 @@ export const AboutSection: React.FC = () => {
               </p>
             </div>
 
-            <div data-ps className="clay-surface p-5">
+            <div className="clay-surface p-5">
               <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
                 LOCATION
               </span>
@@ -93,10 +81,10 @@ export const AboutSection: React.FC = () => {
                 Bengaluru, India
               </p>
             </div>
-          </motion.div>
+          </div>
 
           {/* Quick Direct Link / Contact Prompt */}
-          <div className="pt-2">
+          <div data-ps className="pt-2">
             <a
               href="#contact"
               className="inline-flex items-center gap-2 text-xs font-mono tracking-widest text-[#df5035] hover:text-[#ff6542] font-semibold uppercase group transition-colors"

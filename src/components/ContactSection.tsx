@@ -27,7 +27,7 @@ export const ContactSection: React.FC = () => {
   return (
     <section id="contact" className="relative py-24 sm:py-32 md:py-40 px-6 sm:px-8 md:px-12 max-w-7xl mx-auto w-full border-t border-white/[0.08]">
       {/* Section Header */}
-      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
+      <div data-ps className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
         <div className="flex items-center gap-3">
           <span className="text-xs font-mono tracking-widest text-[#df5035] font-bold">04</span>
           <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">/ CONNECT</span>
@@ -42,31 +42,23 @@ export const ContactSection: React.FC = () => {
         {/* Left Column: Direct Communication Channels */}
         <div className="lg:col-span-7 flex flex-col justify-between space-y-10">
           <div>
-            <motion.h2
+            <h2
               data-ps
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-[-0.05em] leading-[0.88] text-white uppercase select-none"
             >
-              GET IN TOUCH
-            </motion.h2>
+              CONTACT
+            </h2>
 
-            <motion.p
+            <p
               data-ps
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="mt-6 text-base sm:text-lg text-zinc-400 font-sans leading-relaxed max-w-xl text-balance"
             >
               Whether you want to collaborate on a systems project, explore an internship opportunity, or talk about engineering architecture, my inbox is open.
-            </motion.p>
+            </p>
           </div>
 
           {/* Direct Email Display in Tactile Clay Well */}
-          <div className="clay-surface p-6 sm:p-7 space-y-3">
+          <div data-ps className="clay-surface p-6 sm:p-7 space-y-3">
             <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block font-semibold">
               PRIMARY EMAIL
             </span>
@@ -99,7 +91,7 @@ export const ContactSection: React.FC = () => {
           </div>
 
           {/* Social Profiles */}
-          <div className="space-y-3 pt-2">
+          <div data-ps className="space-y-3 pt-2">
             <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block font-semibold">
               EXTERNAL NETWORKS
             </span>

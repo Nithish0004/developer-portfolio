@@ -296,9 +296,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           />
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.98, y: 16 }}
-            animate={isEntered ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.98, y: 16 }}
-            transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            initial={{ opacity: 0, scale: 0.95, y: 8 }}
+            animate={isEntered ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.95, y: 8 }}
+            transition={{ duration: 0.85, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="w-full flex items-center justify-center overflow-visible"
             style={{ position: 'relative', height: '260px', width: '100%' }}
           >

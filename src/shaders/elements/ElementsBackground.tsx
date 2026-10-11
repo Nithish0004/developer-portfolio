@@ -285,6 +285,30 @@ main { display: block; }
       .replace("logos.claude", "logos.n");
   }
 
+  // Support Warm Electric Orange (#FF704F / #E56548) for lightning N when requested
+  // Replace Anthropic electric blue / lilac particle colors with warm orange-white
+  doc = doc
+    .replace(
+      "colA: [0.45, 0.50, 1.0], colB: [0.95, 0.95, 1.0]",
+      "colA: [1.0, 0.44, 0.28], colB: [1.0, 0.88, 0.78]"
+    )
+    .replace(
+      "mix(vec3(0.34, 0.39, 1.0), vec3(0.96, 0.94, 1.0), pow(layer, 0.75))",
+      "mix(vec3(1.0, 0.42, 0.26), vec3(1.0, 0.92, 0.84), pow(layer, 0.75))"
+    )
+    .replace(
+      "branchLife * vec3(0.64, 0.70, 1.0)",
+      "branchLife * vec3(1.0, 0.55, 0.36)"
+    )
+    .replace(
+      "col += rim * vec3(0.35, 0.4, 0.8);",
+      "col += rim * vec3(0.95, 0.42, 0.22);"
+    )
+    .replace(
+      "vec3(0.055, 0.06, 0.10) + big * vec3(0.55, 0.58, 0.85);",
+      "vec3(0.055, 0.04, 0.035) + big * vec3(0.95, 0.55, 0.38);"
+    );
+
   return doc;
 }
 

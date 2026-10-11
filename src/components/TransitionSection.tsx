@@ -41,11 +41,7 @@ export const TransitionSection: React.FC = () => {
             <motion.div
               key={item.text}
               style={{ x: item.transform, transform: 'translateZ(0)' }}
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
-              transition={{ duration: 0.8, delay: idx * 0.15, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-baseline gap-4 sm:gap-8 will-change-[transform,opacity]"
+              className="flex items-baseline gap-4 sm:gap-8 will-change-[transform]"
             >
               <span className="font-mono text-xs sm:text-sm text-zinc-600 tracking-wider font-semibold">
                 0{idx + 1}
@@ -61,8 +57,8 @@ export const TransitionSection: React.FC = () => {
         </div>
 
         {/* Bottom Editorial Caption */}
-        <div className="pt-8 sm:pt-12 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <p data-ps className="max-w-md text-xs sm:text-sm text-zinc-400 font-sans leading-relaxed">
+        <div data-ps className="pt-8 sm:pt-12 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <p className="max-w-md text-xs sm:text-sm text-zinc-400 font-sans leading-relaxed">
             Engineering resilient software through relentless stress testing, deep curiosity, and architectural refinement.
           </p>
           <span className="text-[11px] font-mono tracking-widest text-zinc-500 uppercase font-semibold">

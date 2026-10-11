@@ -216,11 +216,13 @@ export interface TrackedItem {
   assembled: boolean;
   docTop: number;
   docBottom: number;
+  docLeft: number;
   height: number;
   width: number;
   from: number;
   to: number;
   anchor: number;
+  cacheCanvas?: HTMLCanvasElement;
 }
 
 export interface ParticleScrollInstance {
@@ -368,7 +370,7 @@ export function createParticleScroll(
   }
 
   function rowTargetFor(docRowY: number) {
-    if (reducedMotion || !introDone) return 1;
+    if (reducedMotion) return 1;
     const h = Math.max(output.clientHeight, 1);
     const vy = docRowY - scrollSmooth;
 
@@ -391,7 +393,16 @@ export function createParticleScroll(
 
   function targetForRow(i: number, density: number) {
     const u = unitAt(i);
-    return rowTargetFor(u ? u.anchor : (i + 0.5) * density);
+    if (!u) return rowTargetFor((i + 0.5) * density);
+    const unitHeight = (u.to - u.from) * density;
+    if (unitHeight < 100) {
+      return rowTargetFor(u.anchor);
+    }
+    // For taller elements like project cards, images, and surfaces,
+    // blend anchor with the row's vertical position for a progressive wave
+    const rowY = (i + 0.5) * density;
+    const blendY = u.anchor * 0.65 + rowY * 0.35;
+    return rowTargetFor(blendY);
   }
 
   function updateRows(dt: number, density: number, winStart: number, winLen: number) {
@@ -406,12 +417,11 @@ export function createParticleScroll(
     let minP = 1;
 
     const settle = Math.max(config.settle, 0.05);
-    const hold = Math.max(config.hold || settle, settle);
 
     for (let i = 0; i < docRows; i++) {
       const target = targetForRow(i, density);
       let p = rowProgress[i];
-      const inWin = i >= winStart - 4 && i < winStart + winLen + 4;
+      const inWin = i >= winStart - 6 && i < winStart + winLen + 6;
       if (reducedMotion || !inWin) {
         if (p !== target) {
           rowProgress[i] = target;
@@ -419,29 +429,18 @@ export function createParticleScroll(
         }
       } else {
         const diff = target - p;
-        const rate = Math.max(dt / settle, Math.abs(diff) * 0.35);
-
-        if (target >= COMMIT) {
-          const next = Math.min(1, Math.max(Math.min(target, p + rate), p + dt / hold));
-          if (next > p) {
-            p = next;
-            rowsAnimating = true;
-            rowProgress[i] = p;
+        if (Math.abs(diff) > 0.0005) {
+          rowsAnimating = true;
+          const rate = Math.max(dt / settle, Math.abs(diff) * 0.35);
+          if (p < target) {
+            p = Math.min(p + rate, target);
+          } else {
+            p = Math.max(p - rate, target);
           }
-        } else if (p < target) {
-          const next = Math.min(p + rate, target);
-          if (next > p) {
-            p = next;
-            rowsAnimating = true;
-            rowProgress[i] = p;
-          }
-        } else if (p > target) {
-          const next = Math.max(p - dt / (settle * 0.6), target);
-          if (next < p) {
-            p = next;
-            rowsAnimating = true;
-            rowProgress[i] = p;
-          }
+          rowProgress[i] = p;
+        } else if (p !== target) {
+          p = target;
+          rowProgress[i] = p;
         }
       }
       if (inWin && p < minP) minP = p;
@@ -549,29 +548,25 @@ export function createParticleScroll(
 
     const scrollTop = content.scrollTop;
     lag += scrollTop - lastScrollTop;
+    const scrollMoved = Math.abs(scrollTop - lastScrollTop) > 0.5;
     lastScrollTop = scrollTop;
     lag *= Math.exp(-delta / 0.22);
     lag = Math.min(Math.max(lag, -400), 400);
     if (reducedMotion || Math.abs(lag) < 0.1) lag = 0;
-
-    if (!introDone) {
-      if (reducedMotion) {
-        introDone = true;
-      } else if (introReady) {
-        introWait += delta;
-        if (introWait >= 0.8) introDone = true;
-      }
-    }
 
     const tau = config.smoothing;
     const k = reducedMotion || tau <= 0 ? 1 : 1 - Math.exp(-delta / Math.max(tau, 1e-4));
     scrollSmooth += (scrollTop - scrollSmooth) * k;
     if (Math.abs(scrollTop - scrollSmooth) < 0.5) scrollSmooth = scrollTop;
 
+    if (scrollMoved && !rowsAssembled) {
+      requestPaint();
+    }
+
     render(delta);
 
     // PERFORMANCE PAUSE: When all rows in view have assembled and motion has settled, stop loop
-    if (!contentDirty && scrollSmooth === scrollTop && !rowsAnimating && rowsAssembled && introDone && lag === 0) {
+    if (!contentDirty && scrollSmooth === scrollTop && !rowsAnimating && rowsAssembled && lag === 0) {
       running = false;
       return;
     }
@@ -681,27 +676,45 @@ export function rasterise(
     const bottom = t.docBottom - sy;
     if (bottom < -margin || top > vh + margin) continue;
     t.el.classList.add('ps-hidden');
-    paintElement(t.el, ctx);
+    if (t.cacheCanvas && t.width > 0 && t.height > 0) {
+      ctx.drawImage(t.cacheCanvas, t.docLeft, top, t.width, t.height);
+    } else {
+      paintElement(t.el, ctx, 0, 0);
+    }
   }
 }
 
-export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
+export function paintElement(
+  root: HTMLElement,
+  ctx: CanvasRenderingContext2D,
+  offsetX = 0,
+  offsetY = 0
+) {
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
   let node: Node | null = root;
 
   const paintBox = (el: HTMLElement) => {
     const cs = getComputedStyle(el);
     const bg = cs.backgroundColor;
+    const bgImage = cs.backgroundImage;
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) return;
 
-    const hasBg = bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent';
+    const hasBgColor = bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent';
+    const hasGradient = bgImage && bgImage.includes('gradient');
     const borderTopWidth = parseFloat(cs.borderTopWidth) || 0;
-    const borderTopColor = cs.borderTopColor;
-    const hasBorder = borderTopWidth > 0 && borderTopColor && borderTopColor !== 'transparent' && borderTopColor !== 'rgba(0, 0, 0, 0)';
+    const borderBottomWidth = parseFloat(cs.borderBottomWidth) || 0;
+    const borderLeftWidth = parseFloat(cs.borderLeftWidth) || 0;
+    const borderRightWidth = parseFloat(cs.borderRightWidth) || 0;
+    const borderWidth = Math.max(borderTopWidth, borderBottomWidth, borderLeftWidth, borderRightWidth);
+    const borderColor = cs.borderTopColor || cs.borderBottomColor || cs.borderColor || 'rgba(255, 255, 255, 0.08)';
+    const hasBorder = borderWidth > 0 && borderColor && borderColor !== 'transparent' && borderColor !== 'rgba(0, 0, 0, 0)';
     const hasShadow = cs.boxShadow && cs.boxShadow !== 'none';
 
-    if (!hasBg && !hasBorder && !hasShadow) return;
+    if (!hasBgColor && !hasGradient && !hasBorder && !hasShadow) return;
+
+    const x = r.left - offsetX;
+    const y = r.top - offsetY;
 
     const tl = parseFloat(cs.borderTopLeftRadius) || 0;
     const tr = parseFloat(cs.borderTopRightRadius) || 0;
@@ -711,20 +724,44 @@ export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
 
     ctx.save();
 
-    if (hasShadow && hasBg) {
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.09)';
-      ctx.shadowBlur = 14;
+    if (hasShadow && (hasBgColor || hasGradient)) {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = 18;
       ctx.shadowOffsetY = 6;
     }
 
     ctx.beginPath();
     if (hasRadius && (ctx as any).roundRect) {
-      (ctx as any).roundRect(r.left, r.top, r.width, r.height, [tl, tr, br, bl]);
+      (ctx as any).roundRect(x, y, r.width, r.height, [tl, tr, br, bl]);
     } else {
-      ctx.rect(r.left, r.top, r.width, r.height);
+      ctx.rect(x, y, r.width, r.height);
     }
 
-    if (hasBg) {
+    if (hasGradient) {
+      if (el.classList.contains('clay-btn-accent')) {
+        const grad = ctx.createLinearGradient(x, y, x + r.width, y + r.height);
+        grad.addColorStop(0, '#df5035');
+        grad.addColorStop(1, '#b83822');
+        ctx.fillStyle = grad;
+      } else if (el.classList.contains('clay-card')) {
+        const grad = ctx.createLinearGradient(x, y, x + r.width, y + r.height);
+        grad.addColorStop(0, 'rgba(24, 24, 29, 0.85)');
+        grad.addColorStop(1, 'rgba(14, 14, 18, 0.95)');
+        ctx.fillStyle = grad;
+      } else if (el.classList.contains('clay-surface')) {
+        ctx.fillStyle = 'rgba(17, 17, 21, 0.88)';
+      } else {
+        const cols = bgImage.match(/rgba?\([^)]+\)|#[0-9a-fA-F]+/g);
+        if (cols && cols.length >= 2) {
+          const grad = ctx.createLinearGradient(x, y, x + r.width, y + r.height);
+          cols.forEach((c, idx) => grad.addColorStop(idx / Math.max(cols.length - 1, 1), c));
+          ctx.fillStyle = grad;
+        } else {
+          ctx.fillStyle = 'rgba(20, 20, 25, 0.85)';
+        }
+      }
+      ctx.fill();
+    } else if (hasBgColor) {
       ctx.fillStyle = bg;
       ctx.fill();
     }
@@ -734,8 +771,8 @@ export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
     ctx.shadowOffsetY = 0;
 
     if (hasBorder) {
-      ctx.strokeStyle = borderTopColor;
-      ctx.lineWidth = borderTopWidth;
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = borderWidth;
       ctx.stroke();
     }
 
@@ -747,20 +784,31 @@ export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
     const r = img.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) return;
 
+    const x = r.left - offsetX;
+    const y = r.top - offsetY;
+
     const cs = getComputedStyle(img);
-    const tl = parseFloat(cs.borderTopLeftRadius) || 0;
-    const tr = parseFloat(cs.borderTopRightRadius) || 0;
-    const br = parseFloat(cs.borderBottomRightRadius) || 0;
-    const bl = parseFloat(cs.borderBottomLeftRadius) || 0;
+    let tl = parseFloat(cs.borderTopLeftRadius) || 0;
+    let tr = parseFloat(cs.borderTopRightRadius) || 0;
+    let br = parseFloat(cs.borderBottomRightRadius) || 0;
+    let bl = parseFloat(cs.borderBottomLeftRadius) || 0;
+
+    if (tl === 0 && tr === 0 && br === 0 && bl === 0 && img.parentElement) {
+      const pcs = getComputedStyle(img.parentElement);
+      tl = parseFloat(pcs.borderTopLeftRadius) || 0;
+      tr = parseFloat(pcs.borderTopRightRadius) || 0;
+      br = parseFloat(pcs.borderBottomRightRadius) || 0;
+      bl = parseFloat(pcs.borderBottomLeftRadius) || 0;
+    }
     const hasRadius = tl > 0 || tr > 0 || br > 0 || bl > 0;
 
     ctx.save();
     if (hasRadius) {
       ctx.beginPath();
       if ((ctx as any).roundRect) {
-        (ctx as any).roundRect(r.left, r.top, r.width, r.height, [tl, tr, br, bl]);
+        (ctx as any).roundRect(x, y, r.width, r.height, [tl, tr, br, bl]);
       } else {
-        ctx.rect(r.left, r.top, r.width, r.height);
+        ctx.rect(x, y, r.width, r.height);
       }
       ctx.clip();
     }
@@ -770,9 +818,9 @@ export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
       const s = Math.max(r.width / img.naturalWidth, r.height / img.naturalHeight);
       const sw = r.width / s;
       const sh = r.height / s;
-      ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, r.left, r.top, r.width, r.height);
+      ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, x, y, r.width, r.height);
     } else {
-      ctx.drawImage(img, r.left, r.top, r.width, r.height);
+      ctx.drawImage(img, x, y, r.width, r.height);
     }
     ctx.restore();
   };
@@ -780,6 +828,8 @@ export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
   const paintSvg = (svg: SVGSVGElement) => {
     const r = svg.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) return;
+    const x = r.left - offsetX;
+    const y = r.top - offsetY;
     try {
       const xml = new XMLSerializer().serializeToString(svg);
       let img = svgImageCache.get(xml);
@@ -789,7 +839,7 @@ export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
         svgImageCache.set(xml, img);
       }
       if (img.complete && img.naturalWidth) {
-        ctx.drawImage(img, r.left, r.top, r.width, r.height);
+        ctx.drawImage(img, x, y, r.width, r.height);
       }
     } catch (e) {
       // Fallback
@@ -824,7 +874,9 @@ export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
       if (!rects.length) continue;
       const r = rects[0];
       if (r.width === 0) continue;
-      ctx.fillText(m[0], r.left, r.top + (r.height - (asc + desc)) / 2 + asc);
+      const x = r.left - offsetX;
+      const y = r.top - offsetY + (r.height - (asc + desc)) / 2 + asc;
+      ctx.fillText(m[0], x, y);
     }
   };
 
@@ -874,6 +926,7 @@ export function mountParticleScroll(
     assembled: false,
     docTop: 0,
     docBottom: 0,
+    docLeft: 0,
     height: 0,
     width: 0,
     from: 0,
@@ -882,12 +935,22 @@ export function mountParticleScroll(
   }));
 
   const measureTracked = () => {
+    // 1. Temporarily restore visibility to measure and rasterise accurately
+    for (let i = 0; i < tracked.length; i++) {
+      if (!tracked[i].assembled) {
+        tracked[i].el.classList.remove('ps-hidden');
+      }
+    }
+
     const sy = scroller.scrollTop;
+    const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.0 : 1.35);
+
     for (let i = 0; i < tracked.length; i++) {
       const t = tracked[i];
       const r = t.el.getBoundingClientRect();
       t.docTop = r.top + sy;
       t.docBottom = r.bottom + sy;
+      t.docLeft = r.left;
       t.height = r.height;
       t.width = r.width;
       const from = Math.max(0, Math.floor(t.docTop / density) - 1);
@@ -896,7 +959,34 @@ export function mountParticleScroll(
       t.from = from;
       t.to = to;
       t.anchor = t.docTop + r.height * anchorBias;
+
+      if (r.width > 0 && r.height > 0) {
+        if (!t.cacheCanvas) {
+          t.cacheCanvas = document.createElement('canvas');
+        }
+        const cw = Math.ceil(r.width * dpr);
+        const ch = Math.ceil(r.height * dpr);
+        if (t.cacheCanvas.width !== cw || t.cacheCanvas.height !== ch) {
+          t.cacheCanvas.width = cw;
+          t.cacheCanvas.height = ch;
+        }
+        const cctx = t.cacheCanvas.getContext('2d');
+        if (cctx) {
+          cctx.setTransform(1, 0, 0, 1, 0, 0);
+          cctx.clearRect(0, 0, cw, ch);
+          cctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          paintElement(t.el, cctx, r.left, r.top);
+        }
+      }
     }
+
+    // 2. Hide unassembled elements so only WebGL particles represent them
+    for (let i = 0; i < tracked.length; i++) {
+      if (!tracked[i].assembled) {
+        tracked[i].el.classList.add('ps-hidden');
+      }
+    }
+
     if (inst) {
       inst.setUnits(tracked.map((t) => ({ from: t.from, to: t.to, anchor: t.anchor })));
     }
@@ -935,15 +1025,16 @@ export function mountParticleScroll(
           for (let j = top; j <= bottom; j++) {
             if (rows[j] < min) min = rows[j];
           }
-          const done = min >= 0.9995;
+          const done = min >= 0.999;
           if (done && !t.assembled) {
             t.assembled = true;
             t.el.classList.remove('ps-hidden');
             t.el.classList.add('ps-in');
             changed = true;
-          } else if (!done && t.assembled && min < 0.6) {
+          } else if (!done && t.assembled) {
             t.assembled = false;
             t.el.classList.remove('ps-in');
+            t.el.classList.add('ps-hidden');
             changed = true;
           }
         }
@@ -981,6 +1072,7 @@ export function mountParticleScroll(
     source.remove();
     for (const t of tracked) {
       t.el.classList.remove('ps-hidden', 'ps-in');
+      t.cacheCanvas = undefined;
     }
   };
 

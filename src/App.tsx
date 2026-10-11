@@ -4,7 +4,6 @@ import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { TransitionSection } from './components/TransitionSection';
 import { AboutSection } from './components/AboutSection';
-import { ParticleReconstructionSection } from './components/ParticleReconstructionSection';
 import { WorkSection } from './components/WorkSection';
 import { SkillsSection } from './components/SkillsSection';
 import { ContactSection } from './components/ContactSection';
@@ -163,12 +162,7 @@ export default function App() {
           {/* 4. About Section */}
           <AboutSection />
 
-          {/* 5. Interactive 3D GPU Particle Reconstruction Visualization Section */}
-          <ParticleReconstructionSection
-            onViewProject={() => scrollToSection('work')}
-          />
-
-          {/* 6. Selected Work Section */}
+          {/* 5. Selected Work Section */}
           <WorkSection projects={sampleProjects} />
 
           {/* 7. Skills Section */}
