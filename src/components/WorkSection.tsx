@@ -14,12 +14,12 @@ export const WorkSection: React.FC<WorkSectionProps> = ({ projects }) => {
   return (
     <section id="work" className="relative py-24 sm:py-32 md:py-40 px-6 sm:px-8 md:px-12 max-w-7xl mx-auto w-full">
       {/* Section Header */}
-      <div data-ps className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
+        <div data-ps className="flex items-center gap-3">
           <span className="text-xs font-mono tracking-widest text-[#df5035] font-bold">02</span>
           <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">/ ARCHIVE</span>
         </div>
-        <div className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">
+        <div data-ps className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">
           CURATED PORTFOLIO
         </div>
       </div>

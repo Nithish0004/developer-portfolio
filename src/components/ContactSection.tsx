@@ -27,12 +27,12 @@ export const ContactSection: React.FC = () => {
   return (
     <section id="contact" className="relative py-24 sm:py-32 md:py-40 px-6 sm:px-8 md:px-12 max-w-7xl mx-auto w-full border-t border-white/[0.08]">
       {/* Section Header */}
-      <div data-ps className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
+        <div data-ps className="flex items-center gap-3">
           <span className="text-xs font-mono tracking-widest text-[#df5035] font-bold">04</span>
           <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">/ CONNECT</span>
         </div>
-        <div className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">
+        <div data-ps className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">
           DIRECT LINE
         </div>
       </div>
@@ -57,36 +57,38 @@ export const ContactSection: React.FC = () => {
             </p>
           </div>
 
-          {/* Direct Email Display in Tactile Clay Well */}
-          <div data-ps className="clay-surface p-6 sm:p-7 space-y-3">
-            <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block font-semibold">
-              PRIMARY EMAIL
-            </span>
-            <div className="flex flex-wrap items-center gap-4">
-              <a
-                href={`mailto:${personalInfo.contact.email}`}
-                className="font-display font-bold text-base sm:text-xl md:text-2xl text-white hover:text-[#df5035] transition-colors break-all sm:break-normal"
-              >
-                {personalInfo.contact.email}
-              </a>
-              <button
-                type="button"
-                onClick={handleCopyEmail}
-                className="clay-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono tracking-widest text-zinc-300 hover:text-white uppercase cursor-pointer font-semibold"
-                aria-label="Copy email address"
-              >
-                {copied ? (
-                  <>
-                    <Check size={12} className="text-[#df5035]" />
-                    <span className="text-[#df5035]">COPIED</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={12} />
-                    <span>COPY</span>
-                  </>
-                )}
-              </button>
+          {/* Direct Email Display in Tactile Clay Well (Template remains visible, text reveals) */}
+          <div className="clay-surface p-6 sm:p-7 space-y-3">
+            <div data-ps className="space-y-3">
+              <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest block font-semibold">
+                PRIMARY EMAIL
+              </span>
+              <div className="flex flex-wrap items-center gap-4">
+                <a
+                  href={`mailto:${personalInfo.contact.email}`}
+                  className="font-display font-bold text-base sm:text-xl md:text-2xl text-white hover:text-[#df5035] transition-colors break-all sm:break-normal"
+                >
+                  {personalInfo.contact.email}
+                </a>
+                <button
+                  type="button"
+                  onClick={handleCopyEmail}
+                  className="clay-btn inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-mono tracking-widest text-zinc-300 hover:text-white uppercase cursor-pointer font-semibold"
+                  aria-label="Copy email address"
+                >
+                  {copied ? (
+                    <>
+                      <Check size={12} className="text-[#df5035]" />
+                      <span className="text-[#df5035]">COPIED</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={12} />
+                      <span>COPY</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -121,10 +123,10 @@ export const ContactSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Tactile Clay Contact CTA Form */}
+        {/* Right Column: Tactile Clay Contact CTA Form (Template remains visible, fields reveal) */}
         <div className="lg:col-span-5">
-          <div data-ps className="clay-card p-6 sm:p-8 md:p-10">
-            <div className="pb-6 border-b border-white/[0.08] mb-6">
+          <div className="clay-card p-6 sm:p-8 md:p-10">
+            <div data-ps className="pb-6 border-b border-white/[0.08] mb-6">
               <h3 className="font-display font-bold text-xl text-white tracking-tight">
                 SEND A MESSAGE
               </h3>
@@ -161,7 +163,7 @@ export const ContactSection: React.FC = () => {
                 </button>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <form data-ps onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label htmlFor="name" className="block text-xs font-mono text-zinc-400 uppercase tracking-wider pb-2 font-semibold">
                     YOUR NAME

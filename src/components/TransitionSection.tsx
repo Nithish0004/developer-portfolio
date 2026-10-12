@@ -27,9 +27,9 @@ export const TransitionSection: React.FC = () => {
     >
       <div className="max-w-7xl mx-auto px-6 sm:px-8 md:px-12 relative z-10">
         {/* Subtle Top Metadata Line */}
-        <div data-ps className="flex items-center justify-between text-xs font-mono tracking-widest text-zinc-500 uppercase pb-8 sm:pb-12 border-b border-white/[0.08]">
-          <span>00 / PHILOSOPHY</span>
-          <span className="flex items-center gap-2 text-zinc-400">
+        <div className="flex items-center justify-between text-xs font-mono tracking-widest text-zinc-500 uppercase pb-8 sm:pb-12 border-b border-white/[0.08]">
+          <span data-ps>00 / PHILOSOPHY</span>
+          <span data-ps className="flex items-center gap-2 text-zinc-400">
             <span className="w-1.5 h-1.5 rounded-full bg-[#df5035] shadow-[0_0_6px_#df5035]" />
             ITERATIVE SYSTEMS
           </span>
@@ -57,11 +57,11 @@ export const TransitionSection: React.FC = () => {
         </div>
 
         {/* Bottom Editorial Caption */}
-        <div data-ps className="pt-8 sm:pt-12 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <p className="max-w-md text-xs sm:text-sm text-zinc-400 font-sans leading-relaxed">
+        <div className="pt-8 sm:pt-12 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <p data-ps className="max-w-md text-xs sm:text-sm text-zinc-400 font-sans leading-relaxed">
             Engineering resilient software through relentless stress testing, deep curiosity, and architectural refinement.
           </p>
-          <span className="text-[11px] font-mono tracking-widest text-zinc-500 uppercase font-semibold">
+          <span data-ps className="text-[11px] font-mono tracking-widest text-zinc-500 uppercase font-semibold">
             CORE DISCIPLINE
           </span>
         </div>

@@ -17,7 +17,6 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
 
   return (
     <article
-      data-ps
       className="clay-card p-6 sm:p-8 md:p-10"
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
@@ -28,7 +27,7 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
           }`}
         >
           {/* Top Identifier Row */}
-          <div className="flex items-center gap-3">
+          <div data-ps className="flex items-center gap-3">
             <span className="w-7 h-7 rounded-lg clay-inset flex items-center justify-center font-mono text-xs font-bold text-[#df5035]">
               {project.number}
             </span>
@@ -39,7 +38,7 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
           </div>
 
           {/* Project Title */}
-          <div className="space-y-1.5">
+          <div data-ps className="space-y-1.5">
             <h3
               onClick={() => onSelectProject(project)}
               className="cursor-pointer font-display font-bold text-2xl sm:text-3xl text-white tracking-[-0.03em] leading-tight hover:text-[#df5035] transition-colors inline-block"
@@ -54,12 +53,12 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
           </div>
 
           {/* Short Description */}
-          <p className="text-sm sm:text-base font-sans text-zinc-300 leading-relaxed text-balance">
+          <p data-ps className="text-sm sm:text-base font-sans text-zinc-300 leading-relaxed text-balance">
             {project.description}
           </p>
 
           {/* Technologies: Clean unboxed text with dividers (Zero-pill rule) */}
-          <div className="pt-2">
+          <div data-ps className="pt-2">
             <span className="block text-[11px] font-mono tracking-widest text-zinc-500 uppercase pb-2 font-semibold">
               TECHNOLOGIES
             </span>
@@ -78,7 +77,7 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
           </div>
 
           {/* Action Links with Tactile Clay Buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-3">
+          <div data-ps className="flex flex-wrap items-center gap-3 pt-3">
             {project.githubUrl && (
               <a
                 href={project.githubUrl}
@@ -133,6 +132,7 @@ export const ProjectShowcaseItem: React.FC<ProjectShowcaseItemProps> = ({
 
             {/* Image with smooth scale */}
             <img
+              data-ps
               src={project.image}
               alt={project.name}
               referrerPolicy="no-referrer"

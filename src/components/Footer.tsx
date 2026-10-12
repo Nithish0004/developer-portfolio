@@ -9,7 +9,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer data-ps className="w-full border-t border-white/[0.08] bg-[#070709] py-10 sm:py-14 px-6 sm:px-8 md:px-12">
+    <footer className="w-full border-t border-white/[0.08] bg-[#070709] py-10 sm:py-14 px-6 sm:px-8 md:px-12">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         {/* Left: Name */}
         <div className="text-center sm:text-left flex items-center gap-2.5">

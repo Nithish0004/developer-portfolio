@@ -6,12 +6,12 @@ export const AboutSection: React.FC = () => {
   return (
     <section id="about" className="relative py-24 sm:py-32 md:py-40 px-6 sm:px-8 md:px-12 max-w-7xl mx-auto w-full">
       {/* Section Header */}
-      <div data-ps className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between pb-8 sm:pb-12 border-b border-white/[0.08]">
+        <div data-ps className="flex items-center gap-3">
           <span className="text-xs font-mono tracking-widest text-[#df5035] font-bold">01</span>
           <span className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">/ PROFILE</span>
         </div>
-        <div className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">
+        <div data-ps className="text-xs font-mono tracking-widest text-zinc-500 uppercase font-medium">
           {personalInfo.metadataTag}
         </div>
       </div>
@@ -30,17 +30,14 @@ export const AboutSection: React.FC = () => {
 
         {/* Right: Editorial Typography Prose in Tactile Clay Container */}
         <div className="lg:col-span-8 space-y-8 sm:space-y-10">
-          {/* Lead Paragraph in Clay Surface */}
-          <div
-            data-ps
-            className="clay-surface p-8 sm:p-10"
-          >
-            <p className="font-display text-2xl sm:text-3xl md:text-3.5xl text-white font-medium leading-snug tracking-tight text-balance">
+          {/* Lead Paragraph in Clay Surface (Template remains visible, text reveals) */}
+          <div className="clay-surface p-8 sm:p-10">
+            <p data-ps className="font-display text-2xl sm:text-3xl md:text-3.5xl text-white font-medium leading-snug tracking-tight text-balance">
               I&apos;m <span className="font-extrabold text-[#df5035]">Nithish S</span>, an Information Science Engineering student at{' '}
               <span className="font-semibold text-white">RV College of Engineering</span>, Bengaluru.
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 text-zinc-400 font-sans text-base leading-relaxed border-t border-white/[0.08] mt-6">
+            <div data-ps className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 text-zinc-400 font-sans text-base leading-relaxed border-t border-white/[0.08] mt-6">
               <p>
                 I enjoy building software products, exploring AI/ML, and understanding how systems work underneath the interface.
               </p>
@@ -50,42 +47,46 @@ export const AboutSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Editorial Specs / Metadata Table in Tactile Clay Inset Wells (Zero-Pill Discipline) */}
-          <div
-            data-ps
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
-          >
+          {/* Editorial Specs / Metadata Table in Tactile Clay Inset Wells (Templates unchanged in BG) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="clay-surface p-5">
-              <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
-                DISCIPLINE
-              </span>
-              <p className="text-sm font-semibold text-white">
-                Information Science &amp; Eng.
-              </p>
+              <div data-ps>
+                <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
+                  DISCIPLINE
+                </span>
+                <p className="text-sm font-semibold text-white">
+                  Information Science &amp; Eng.
+                </p>
+              </div>
             </div>
 
             <div className="clay-surface p-5">
-              <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
-                INSTITUTION
-              </span>
-              <p className="text-sm font-semibold text-white">
-                RV College of Engineering
-              </p>
+              <div data-ps>
+                <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
+                  INSTITUTION
+                </span>
+                <p className="text-sm font-semibold text-white">
+                  RV College of Engineering
+                </p>
+              </div>
             </div>
 
             <div className="clay-surface p-5">
-              <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
-                LOCATION
-              </span>
-              <p className="text-sm font-semibold text-white">
-                Bengaluru, India
-              </p>
+              <div data-ps>
+                <span className="block text-[11px] font-mono text-zinc-500 uppercase tracking-widest pb-1 font-semibold">
+                  LOCATION
+                </span>
+                <p className="text-sm font-semibold text-white">
+                  Bengaluru, India
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Quick Direct Link / Contact Prompt */}
-          <div data-ps className="pt-2">
+          <div className="pt-2">
             <a
+              data-ps
               href="#contact"
               className="inline-flex items-center gap-2 text-xs font-mono tracking-widest text-[#df5035] hover:text-[#ff6542] font-semibold uppercase group transition-colors"
             >
