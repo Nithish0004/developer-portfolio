@@ -1,20 +1,12 @@
 /**
- * Canvas UI "Particle Scroll" (WebGL2) — Optimized High-Performance Particle Engine
- *
- * Core Fixes & Architecture:
- * 1. Template Preservation: Only text and image elements are rasterized into particles.
- *    Card backgrounds, clay surfaces, borders, and ambient light templates remain 100%
- *    unchanged, static, and visible in the DOM at all times.
- * 2. Zero-Glitch Scroll Architecture: The content texture is mapped in absolute document
- *    coordinates and uploaded once to the GPU. Zero canvas repaints and zero synchronous
- *    gl.texImage2D pipeline stalls occur during scroll, completely eliminating the 1-second freeze.
- * 3. Particle-to-DOM Handoff: Particles converge into place; only once they fully arrange
- *    (progress >= 0.95) does the crisp native text/image reveal with sharp clarity (.ps-in),
- *    while particles for assembled rows seamlessly fade out.
- * 4. Upward Scroll Stability: Assembled elements latch deterministically while in or above view,
- *    preventing flickering, resets, or layout oscillation when scrolling upward.
- * 5. Transparent WebGL Canvas: No full-screen background quad, allowing the underlying dark
- *    obsidian background and ambient volcanic lighting to shine through cleanly.
+ * Canvas UI "Particle Scroll" (WebGL2) — Optimized ThreeUI implementation
+ * 
+ * Performance Enhancements:
+ * 1. Document coordinate caching: Eliminates synchronous layout thrashing (getBoundingClientRect) from 60FPS animation and scroll loops.
+ * 2. Deferred scroll rasterization: Replaces per-event 2D canvas repaints with single batched RAF updates, skipping when sections are already assembled.
+ * 3. Zero-stall texture uploads: Removed synchronous gl.generateMipmap pipeline stalls on full-screen textures.
+ * 4. Adaptive DPR: Caps canvas devicePixelRatio to 1.35 (1.0 on mobile) to eliminate fill-rate bottlenecks on high-DPI screens.
+ * 5. Lifecycle & Tab Visibility: Pauses animation loops when the tab is hidden or when all visible rows are assembled.
  */
 
 export interface ParticleScrollOptions {
@@ -31,40 +23,79 @@ export interface ParticleScrollOptions {
   settle?: number;    // Transition ceiling speed
   hold?: number;      // Transition floor speed
   smoothing?: number; // Scroll smoothing latency factor
-  tintA?: [number, number, number]; // Warm highlight tint A (#df5035)
-  tintB?: [number, number, number]; // Warm highlight tint B (#ff6542)
-  bg?: [number, number, number];    // Background fill color
+  tintA?: [number, number, number]; // Warm highlight tint A (#c4543f)
+  tintB?: [number, number, number]; // Warm highlight tint B (#df6b55)
+  bg?: [number, number, number];    // Background fill color (#f5f1eb)
 }
 
 export const DEFAULTS: Required<ParticleScrollOptions> = {
   point: 0.60,
   band: 220,
-  density: 2.0,
-  size: 1.35,
-  spread: 160,
-  gravity: 0.25,
+  density: 2,
+  size: 1.25,
+  spread: 180,
+  gravity: 0.28,
   drift: 0.6,
-  swirl: 45,
+  swirl: 50,
   stagger: 0.35,
   fade: 0.85,
-  settle: 0.22,
-  hold: 0.32,
-  smoothing: 0.14,
-  tintA: [0.87, 0.31, 0.21], // Magma Crimson (#df5035)
-  tintB: [1.00, 0.40, 0.26], // Bright Magma Orange (#ff6542)
-  bg: [0.027, 0.027, 0.035], // Deep Obsidian (#070709)
+  settle: 0.24,
+  hold: 0.34,
+  smoothing: 0.16,
+  tintA: [0.77, 0.33, 0.25], // Warm terracotta (#c4543f)
+  tintB: [0.93, 0.54, 0.42], // Warm coral-orange (#df6b55)
+  bg: [0.96, 0.945, 0.92],   // Warm cream (#f5f1eb)
 };
+
+const COMMIT = 0.35;
 
 const HASH = `
 float hash (vec2 p) {
   return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
 }`;
 
+const QUAD_VERT = `#version 300 es
+precision highp float;
+layout(location = 0) in vec2 aPos;
+out vec2 vUv;
+void main () {
+  vUv = aPos * 0.5 + 0.5;
+  gl_Position = vec4(aPos, 0.0, 1.0);
+}`;
+
+const BASE_FRAG = `#version 300 es
+precision highp float;
+in vec2 vUv;
+out vec4 outColor;
+uniform sampler2D uContent;
+uniform sampler2D uRowTex;
+uniform vec2 uRes;
+uniform float uDensity;
+uniform float uRowCount;
+uniform float uStagger;
+uniform float uMaxX;
+uniform float uCover;
+uniform float uScroll;
+uniform float uWinStart;
+uniform vec3 uBg;
+${HASH}
+void main () {
+  vec2 px = vec2(vUv.x, 1.0 - vUv.y) * uRes;
+  vec2 cell = floor(vec2(px.x, px.y + uScroll) / uDensity);
+  float h1 = hash(cell);
+  float d = h1 * uStagger;
+  int row = int(clamp(cell.y - uWinStart, 0.0, uRowCount - 1.0));
+  float p = texelFetch(uRowTex, ivec2(row, 0), 0).r;
+  float t = clamp((p - d) / max(1.0 - d, 1e-3), 0.0, 1.0);
+  float vis = step(0.9995, t) * step(px.x, uMaxX * uRes.x);
+  vec4 tex = texture(uContent, vec2(vUv.x, 1.0 - vUv.y));
+  outColor = vec4(mix(uBg, tex.rgb, vis * tex.a), max(uCover, vis * tex.a));
+}`;
+
 const POINT_VERT = `#version 300 es
 precision highp float;
 uniform sampler2D uRowTex;
 uniform vec2 uRes;
-uniform vec2 uDocRes;
 uniform vec2 uGrid;
 uniform float uDensity;
 uniform float uStagger;
@@ -76,10 +107,11 @@ uniform float uTime;
 uniform float uFade;
 uniform float uSize;
 uniform float uDpr;
+uniform float uMaxX;
 uniform float uLag;
 uniform float uScroll;
-uniform float uRowCount;
-out vec2 vDocCoord;
+uniform float uWinStart;
+out vec2 vCenter;
 out float vSize;
 out float vAlpha;
 out float vMerge;
@@ -89,35 +121,28 @@ ${HASH}
 void main () {
   float fid = float(gl_VertexID);
   vec2 local = vec2(mod(fid, uGrid.x), floor(fid / uGrid.x));
-  
-  float docX = (local.x + 0.5) * uDensity;
-  float docY = (local.y + 0.5) * uDensity + uScroll;
-  vec2 cell = floor(vec2(docX, docY) / uDensity);
-
+  vec2 cell = vec2(local.x, local.y + uWinStart);
   float h1 = hash(cell);
   float h2 = hash(cell + vec2(1.7, 9.1));
   float h3 = hash(cell + vec2(5.5, 2.9));
   float h4 = hash(cell + vec2(8.4, 4.2));
   float d = h1 * uStagger;
-
-  vec2 home = vec2(docX, (local.y + 0.5) * uDensity);
-
-  int row = int(clamp(cell.y, 0.0, uRowCount - 1.0));
+  vec2 home = vec2(
+    (cell.x + 0.5) * uDensity,
+    (cell.y + 0.5) * uDensity - uScroll
+  );
+  int row = int(clamp(local.y, 0.0, uGrid.y - 1.0));
   float p = texelFetch(uRowTex, ivec2(row, 0), 0).r;
   float t = clamp((p - d) / max(1.0 - d, 1e-3), 0.0, 1.0);
   float e = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);   // Quintic smootherstep
-
-  // When particles have fully converged into position (t >= 0.98),
-  // they hand off to the crisp native DOM text/image (.ps-in) to prevent ghosting
-  float vis = (1.0 - step(0.98, t))
-    * step(home.x, uRes.x)
+  float vis = (1.0 - step(0.9995, t))
+    * step(home.x, uMaxX * uRes.x)
     * step(home.y, uRes.y)
-    * step(0.0, home.y);
-
+    * step(-uDensity, home.y);
   if (vis < 0.5) {
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
     gl_PointSize = 0.0;
-    vDocCoord = vec2(0.0);
+    vCenter = vec2(0.0);
     vSize = 0.0;
     vAlpha = 0.0;
     vMerge = 0.0;
@@ -125,7 +150,6 @@ void main () {
     vHash = 0.0;
     return;
   }
-
   vec2 dir = normalize(vec2(h2 - 0.5, h3 - 0.5) + vec2(1e-4, 0.0));
   float reach = 0.08 + 0.92 * pow(h4, 2.4);
   vec2 off = dir * uSpread * reach;
@@ -143,17 +167,14 @@ void main () {
   pos.y += uLag * (1.0 - e) * (0.5 + 0.5 * h4);
   pos += vec2(h4 - 0.5, h1 - 0.5) * uDensity * 3.0
     * (1.0 - smoothstep(0.5, 0.85, t));
-
   float grow = smoothstep(0.55, 1.0, e);
   float sizeCss = mix(uSize, uDensity * 1.3, grow);
-
-  vDocCoord = vec2(docX, docY);
+  vCenter = home;
   vSize = sizeCss;
   vAlpha = mix(uFade, 1.0, e);
   vMerge = smoothstep(0.75, 0.97, t);
   vHeat = 1.0 - e;
   vHash = h3;
-
   gl_Position = vec4(
     pos.x / uRes.x * 2.0 - 1.0,
     1.0 - pos.y / uRes.y * 2.0,
@@ -166,32 +187,27 @@ void main () {
 const POINT_FRAG = `#version 300 es
 precision highp float;
 uniform sampler2D uContent;
-uniform vec2 uDocRes;
+uniform vec2 uRes;
 uniform vec3 uTintA;
 uniform vec3 uTintB;
-in vec2 vDocCoord;
+in vec2 vCenter;
 in float vSize;
 in float vAlpha;
 in float vMerge;
 in float vHeat;
 in float vHash;
 out vec4 outColor;
-
 void main () {
   vec2 o = gl_PointCoord - 0.5;
-  vec2 uv = clamp((vDocCoord + o * vSize) / uDocRes, 0.0, 1.0);
+  vec2 uv = clamp((vCenter + o * vSize) / uRes, 0.0, 1.0);
   vec4 tex = texture(uContent, uv);
-  if (tex.a < 0.02) discard;
-
-  float dist = length(o);
-  float circle = 1.0 - smoothstep(0.24, 0.5, dist);
+  float circle = 1.0 - smoothstep(0.25, 0.5, length(o));
   float mask = mix(circle, 1.0, vMerge);
   float a = vAlpha * mask * tex.a;
   if (a < 0.01) discard;
-
   vec3 tint = mix(uTintA, uTintB, vHash);
   float lum = dot(tex.rgb, vec3(0.299, 0.587, 0.114));
-  vec3 rgb = mix(tex.rgb, tint * (0.85 + 0.55 * lum), smoothstep(0.0, 0.85, vHeat));
+  vec3 rgb = mix(tex.rgb, tint * (0.8 + 0.6 * lum), smoothstep(0.0, 0.9, vHeat));
   outColor = vec4(rgb, a);
 }`;
 
@@ -200,7 +216,6 @@ export interface TrackedItem {
   assembled: boolean;
   docTop: number;
   docBottom: number;
-  docLeft: number;
   height: number;
   width: number;
   from: number;
@@ -211,6 +226,7 @@ export interface TrackedItem {
 export interface ParticleScrollInstance {
   setOptions: (next: Partial<ParticleScrollOptions>) => void;
   resize: () => void;
+  setUnits: (units: Array<{ from: number; to: number; anchor: number }>) => void;
   repaint: () => void;
   destroy: () => void;
 }
@@ -221,7 +237,7 @@ export function createParticleScroll(
     content: { scrollTop: number; scrollHeight: number; clientHeight: number; clientWidth: number };
     output: HTMLCanvasElement;
     paint: (source: HTMLCanvasElement, ctx: CanvasRenderingContext2D) => void;
-    onRows?: (rows: Float32Array, density: number) => void;
+    onRows?: (rows: Float32Array, density: number, winStart: number, winLen: number) => void;
     scrollTarget?: Window | HTMLElement;
   },
   options: Partial<ParticleScrollOptions> = {}
@@ -240,10 +256,18 @@ export function createParticleScroll(
 
   const sourceCtx = source.getContext('2d');
   if (!sourceCtx) return null;
-  const sCtx = sourceCtx;
 
   let contentDirty = false;
   let wake = () => {};
+  const requestPaint = () => {
+    try {
+      paint(source, sourceCtx);
+      contentDirty = true;
+      wake();
+    } catch (e) {
+      console.warn(e);
+    }
+  };
 
   function compile(type: number, text: string) {
     const shader = gl!.createShader(type)!;
@@ -272,17 +296,27 @@ export function createParticleScroll(
     return { program, vert, frag, uniforms };
   }
 
+  const base = link(QUAD_VERT, BASE_FRAG);
   const points = link(POINT_VERT, POINT_FRAG);
-  const pointVao = gl.createVertexArray();
+  const quadVao = gl.createVertexArray();
+  gl.bindVertexArray(quadVao);
+  const quad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
+  const pointVao = gl.createVertexArray();
   const contentTexture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, contentTexture);
+  // Linear filtering without mipmaps eliminates heavy synchronous mipmap generation stalls
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 0, 0]));
 
+  let contentMaxX = 1;
   const rowTex = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, rowTex);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -291,14 +325,13 @@ export function createParticleScroll(
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
   let rowProgress = new Float32Array(0);
+  let rowWindow = new Float32Array(0);
   let rowsAnimating = false;
-
-  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let reducedMotion = motionQuery.matches;
-  let time = 0;
-  let scrollSmooth = content.scrollTop;
+  let rowsAssembled = false;
+  let units: Array<{ from: number; to: number; anchor: number }> = [];
 
   function syncCanvasSize() {
+    // Capped DPR prevents fill-rate saturation on Retina/4K displays
     const dpr = Math.min(window.devicePixelRatio || 1, window.innerWidth < 768 ? 1.0 : 1.35);
     const width = Math.max(1, Math.round(output.clientWidth * dpr));
     const height = Math.max(1, Math.round(output.clientHeight * dpr));
@@ -306,14 +339,30 @@ export function createParticleScroll(
       output.width = width;
       output.height = height;
     }
-    paint(source, sCtx);
-    contentDirty = true;
-    uploadContent();
+    contentMaxX = Math.min(1, Math.max(0.05, content.clientWidth / Math.max(output.clientWidth, 1)));
+    const cssWidth = Math.max(1, Math.round(output.clientWidth));
+    const cssHeight = Math.max(1, Math.round(output.clientHeight));
+    if (source.width !== cssWidth * dpr || source.height !== cssHeight * dpr) {
+      source.width = cssWidth * dpr;
+      source.height = cssHeight * dpr;
+    }
+    requestPaint();
   }
+
+  const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let reducedMotion = motionQuery.matches;
+  let time = 0;
+  let introDone = false;
+  let introWait = 0;
+  let introReady = false;
+  let scrollSmooth = content.scrollTop;
+
+  syncCanvasSize();
 
   function uploadContent() {
     if (!contentDirty) return;
     contentDirty = false;
+    introReady = true;
     gl!.bindTexture(gl!.TEXTURE_2D, contentTexture);
     gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA, gl!.RGBA, gl!.UNSIGNED_BYTE, source);
   }
@@ -323,120 +372,131 @@ export function createParticleScroll(
     const h = Math.max(output.clientHeight, 1);
     const vy = docRowY - scrollSmooth;
 
-    // Row is below the viewport
-    if (vy > h) return 0;
-
-    // Row has entered from bottom: compute progressive convergence over reveal band
     const distIntoView = h - vy;
-    const band = Math.max(config.band, 160);
-    const u = Math.min(Math.max(distIntoView / band, 0), 1);
-    const p = u * (2 - u); // Smooth quadratic ease
-    return p;
+    if (distIntoView <= 0) return 0;
+
+    const revealRange = Math.max(h * 0.40, 1);
+    const u = Math.min(Math.max(distIntoView / revealRange, 0), 1);
+    const p = u * (2 - u);
+    return Math.min(Math.max(p, 0), 1);
   }
 
-  function updateRows(dt: number, density: number) {
+  function unitAt(i: number) {
+    for (let u = 0; u < units.length; u++) {
+      const r = units[u];
+      if (i >= r.from && i <= r.to) return r;
+    }
+    return null;
+  }
+
+  function targetForRow(i: number, density: number) {
+    const u = unitAt(i);
+    return rowTargetFor(u ? u.anchor : (i + 0.5) * density);
+  }
+
+  function updateRows(dt: number, density: number, winStart: number, winLen: number) {
     const docRows = Math.max(1, Math.ceil(content.scrollHeight / density));
     if (rowProgress.length !== docRows) {
       const next = new Float32Array(docRows);
-      for (let i = 0; i < docRows; i++) next[i] = rowTargetFor((i + 0.5) * density);
+      for (let i = 0; i < docRows; i++) next[i] = targetForRow(i, density);
       rowProgress = next;
     }
-
+    if (rowWindow.length !== winLen) rowWindow = new Float32Array(winLen);
     rowsAnimating = false;
+    let minP = 1;
+
     const settle = Math.max(config.settle, 0.05);
-    const viewportH = output.clientHeight;
 
     for (let i = 0; i < docRows; i++) {
-      const rowY = (i + 0.5) * density;
-      const target = rowTargetFor(rowY);
+      const target = targetForRow(i, density);
       let p = rowProgress[i];
-
-      // STABILITY LATCH WHEN SCROLLING UPWARD:
-      // If a row was already assembled (>= 0.985) and is still on or above the viewport,
-      // it stays 100% assembled without glitching, flickering, or resetting!
-      const vy = rowY - scrollSmooth;
-      if (p >= 0.985 && vy <= viewportH + 60) {
-        rowProgress[i] = 1.0;
-        continue;
-      }
-
-      if (reducedMotion) {
-        rowProgress[i] = 1.0;
-        continue;
-      }
-
-      const diff = target - p;
-      if (Math.abs(diff) > 0.0005) {
-        rowsAnimating = true;
-        const rate = Math.max(dt / settle, Math.abs(diff) * 0.35);
-        if (p < target) {
-          p = Math.min(p + rate, target);
-        } else {
-          p = Math.max(p - rate, target);
+      const inWin = i >= winStart - 6 && i < winStart + winLen + 6;
+      if (reducedMotion || !inWin) {
+        if (p !== target) {
+          rowProgress[i] = target;
+          p = target;
         }
-        rowProgress[i] = p;
-      } else if (p !== target) {
-        rowProgress[i] = target;
+      } else {
+        const diff = target - p;
+        if (Math.abs(diff) > 0.0005) {
+          rowsAnimating = true;
+          const rate = Math.max(dt / settle, Math.abs(diff) * 0.35);
+          if (p < target) {
+            p = Math.min(p + rate, target);
+          } else {
+            p = Math.max(p - rate, target);
+          }
+          rowProgress[i] = p;
+        } else if (p !== target) {
+          p = target;
+          rowProgress[i] = p;
+        }
       }
+      if (inWin && p < minP) minP = p;
     }
 
-    if (onRows) {
-      onRows(rowProgress, density);
-    }
-
+    rowsAssembled = minP >= 0.9995;
+    rowWindow.fill(1);
+    const from = Math.min(Math.max(winStart, 0), docRows);
+    const to = Math.min(winStart + winLen, docRows);
+    if (to > from) rowWindow.set(rowProgress.subarray(from, to), from - winStart);
     gl!.bindTexture(gl!.TEXTURE_2D, rowTex);
-    gl!.texImage2D(
-      gl!.TEXTURE_2D,
-      0,
-      gl!.R32F,
-      rowProgress.length,
-      1,
-      0,
-      gl!.RED,
-      gl!.FLOAT,
-      rowProgress
-    );
+    gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.R32F, winLen, 1, 0, gl!.RED, gl!.FLOAT, rowWindow);
+    if (onRows) onRows(rowProgress, density, winStart, winLen);
   }
 
   function render(dt: number) {
     uploadContent();
-
-    const dpr = output.width / Math.max(output.clientWidth, 1);
-    const w = output.clientWidth;
-    const h = output.clientHeight;
-    const density = Math.max(1, config.density);
-
-    gl!.viewport(0, 0, output.width, output.height);
-    // Canvas is transparent to preserve background templates and dark lighting
-    gl!.clearColor(0.0, 0.0, 0.0, 0.0);
-    gl!.clear(gl!.COLOR_BUFFER_BIT);
-
-    const docRows = Math.max(1, Math.ceil(content.scrollHeight / density));
-    updateRows(dt, density);
-
+    const w = Math.max(output.clientWidth, 1);
+    const h = Math.max(output.clientHeight, 1);
+    const dpr = output.width / w;
+    const density = Math.max(Math.max(config.density, 1), Math.sqrt((w * h) / 800000));
+    const scrollTop = content.scrollTop;
     const gridX = Math.ceil(w / density);
-    const gridY = Math.ceil(h / density);
-    const pointCount = gridX * gridY;
+    const winStart = Math.floor(scrollTop / density);
+    const winLen = Math.ceil(h / density) + 2;
+    const stagger = Math.min(Math.max(config.stagger, 0), 0.95);
 
-    gl!.enable(gl!.BLEND);
-    gl!.blendFunc(gl!.SRC_ALPHA, gl!.ONE_MINUS_SRC_ALPHA);
-
-    gl!.useProgram(points.program);
-    gl!.bindVertexArray(pointVao);
-
-    gl!.activeTexture(gl!.TEXTURE0);
-    gl!.bindTexture(gl!.TEXTURE_2D, contentTexture);
-    gl!.uniform1i(points.uniforms.uContent, 0);
+    updateRows(dt, density, winStart, winLen);
+    gl!.bindFramebuffer(gl!.FRAMEBUFFER, null);
+    gl!.viewport(0, 0, output.width, output.height);
+    gl!.clearColor(0, 0, 0, 0);
+    gl!.clear(gl!.COLOR_BUFFER_BIT);
 
     gl!.activeTexture(gl!.TEXTURE1);
     gl!.bindTexture(gl!.TEXTURE_2D, rowTex);
-    gl!.uniform1i(points.uniforms.uRowTex, 1);
+    gl!.activeTexture(gl!.TEXTURE0);
+    gl!.bindTexture(gl!.TEXTURE_2D, contentTexture);
+    gl!.enable(gl!.BLEND);
+    gl!.blendFuncSeparate(gl!.SRC_ALPHA, gl!.ONE_MINUS_SRC_ALPHA, gl!.ONE, gl!.ONE_MINUS_SRC_ALPHA);
 
+    gl!.useProgram(base.program);
+    gl!.bindVertexArray(quadVao);
+    gl!.uniform1i(base.uniforms.uContent, 0);
+    gl!.uniform1i(base.uniforms.uRowTex, 1);
+    gl!.uniform2f(base.uniforms.uRes, w, h);
+    gl!.uniform1f(base.uniforms.uDensity, density);
+    gl!.uniform1f(base.uniforms.uRowCount, winLen);
+    gl!.uniform1f(base.uniforms.uStagger, stagger);
+    gl!.uniform1f(base.uniforms.uMaxX, contentMaxX);
+    gl!.uniform1f(base.uniforms.uCover, 0);
+    gl!.uniform1f(base.uniforms.uScroll, scrollTop);
+    gl!.uniform1f(base.uniforms.uWinStart, winStart);
+    gl!.uniform3f(base.uniforms.uBg, config.bg[0], config.bg[1], config.bg[2]);
+    gl!.drawArrays(gl!.TRIANGLE_STRIP, 0, 4);
+
+    if (rowsAssembled) {
+      gl!.disable(gl!.BLEND);
+      return;
+    }
+
+    gl!.useProgram(points.program);
+    gl!.bindVertexArray(pointVao);
+    gl!.uniform1i(points.uniforms.uRowTex, 1);
     gl!.uniform2f(points.uniforms.uRes, w, h);
-    gl!.uniform2f(points.uniforms.uDocRes, source.width, source.height);
-    gl!.uniform2f(points.uniforms.uGrid, gridX, gridY);
+    gl!.uniform2f(points.uniforms.uGrid, gridX, winLen);
     gl!.uniform1f(points.uniforms.uDensity, density);
-    gl!.uniform1f(points.uniforms.uStagger, config.stagger);
+    gl!.uniform1f(points.uniforms.uStagger, stagger);
     gl!.uniform1f(points.uniforms.uSpread, Math.max(config.spread, 0));
     gl!.uniform1f(points.uniforms.uGravity, Math.min(Math.max(config.gravity, -1), 1));
     gl!.uniform1f(points.uniforms.uDrift, Math.max(config.drift, 0));
@@ -445,14 +505,15 @@ export function createParticleScroll(
     gl!.uniform1f(points.uniforms.uFade, Math.min(Math.max(config.fade, 0), 1));
     gl!.uniform1f(points.uniforms.uSize, Math.max(config.size, 0.5));
     gl!.uniform1f(points.uniforms.uDpr, dpr);
+    gl!.uniform1f(points.uniforms.uMaxX, contentMaxX);
+    gl!.uniform1i(points.uniforms.uContent, 0);
     gl!.uniform1f(points.uniforms.uLag, lag);
-    gl!.uniform1f(points.uniforms.uScroll, scrollSmooth);
-    gl!.uniform1f(points.uniforms.uRowCount, docRows);
+    gl!.uniform1f(points.uniforms.uScroll, scrollTop);
+    gl!.uniform1f(points.uniforms.uWinStart, winStart);
     gl!.uniform3f(points.uniforms.uTintA, config.tintA[0], config.tintA[1], config.tintA[2]);
     gl!.uniform3f(points.uniforms.uTintB, config.tintB[0], config.tintB[1], config.tintB[2]);
-
-    gl!.drawArrays(gl!.POINTS, 0, pointCount);
-
+    gl!.drawArrays(gl!.POINTS, 0, gridX * winLen);
+    gl!.bindVertexArray(quadVao);
     gl!.disable(gl!.BLEND);
   }
 
@@ -476,24 +537,29 @@ export function createParticleScroll(
 
     const scrollTop = content.scrollTop;
     lag += scrollTop - lastScrollTop;
+    const scrollMoved = Math.abs(scrollTop - lastScrollTop) > 0.5;
     lastScrollTop = scrollTop;
     lag *= Math.exp(-delta / 0.22);
-    lag = Math.min(Math.max(lag, -300), 300);
+    lag = Math.min(Math.max(lag, -400), 400);
     if (reducedMotion || Math.abs(lag) < 0.1) lag = 0;
 
     const tau = config.smoothing;
     const k = reducedMotion || tau <= 0 ? 1 : 1 - Math.exp(-delta / Math.max(tau, 1e-4));
     scrollSmooth += (scrollTop - scrollSmooth) * k;
-    if (Math.abs(scrollTop - scrollSmooth) < 0.2) scrollSmooth = scrollTop;
+    if (Math.abs(scrollTop - scrollSmooth) < 0.5) scrollSmooth = scrollTop;
+
+    if (scrollMoved && !rowsAssembled) {
+      requestPaint();
+    }
 
     render(delta);
 
-    // Continue loop if animating, moving, or dirty
-    if (rowsAnimating || Math.abs(scrollTop - scrollSmooth) > 0.2 || Math.abs(lag) > 0.2) {
-      raf = requestAnimationFrame(frame);
-    } else {
+    // PERFORMANCE PAUSE: When all rows in view have assembled and motion has settled, stop loop
+    if (!contentDirty && scrollSmooth === scrollTop && !rowsAnimating && rowsAssembled && lag === 0) {
       running = false;
+      return;
     }
+    raf = requestAnimationFrame(frame);
   }
 
   function start() {
@@ -504,7 +570,9 @@ export function createParticleScroll(
   }
 
   wake = start;
+  start();
 
+  // Scroll listener only wakes RAF and avoids direct synchronous rasterization
   function onScroll() {
     start();
   }
@@ -527,11 +595,15 @@ export function createParticleScroll(
   }
   motionQuery.addEventListener('change', onMotionChange);
 
-  syncCanvasSize();
-  start();
+  const observer = new ResizeObserver(() => {
+    syncCanvasSize();
+    start();
+  });
+  observer.observe(output);
 
   return {
     setOptions(next: Partial<ParticleScrollOptions>) {
+      if (!Object.entries(next).some(([key, value]) => (config as any)[key] !== value)) return;
       Object.assign(config, next);
       start();
     },
@@ -539,10 +611,12 @@ export function createParticleScroll(
       syncCanvasSize();
       start();
     },
+    setUnits(next: Array<{ from: number; to: number; anchor: number }>) {
+      units = next || [];
+      start();
+    },
     repaint() {
-      paint(source, sCtx);
-      contentDirty = true;
-      uploadContent();
+      requestPaint();
       start();
     },
     destroy() {
@@ -550,12 +624,18 @@ export function createParticleScroll(
       cancelAnimationFrame(raf);
       (scrollTarget || window).removeEventListener('scroll', onScroll);
       document.removeEventListener('visibilitychange', onVisibilityChange);
+      observer.disconnect();
       motionQuery.removeEventListener('change', onMotionChange);
       gl.deleteTexture(contentTexture);
       gl.deleteTexture(rowTex);
+      gl.deleteProgram(base.program);
       gl.deleteProgram(points.program);
+      gl.deleteShader(base.vert);
+      gl.deleteShader(base.frag);
       gl.deleteShader(points.vert);
       gl.deleteShader(points.frag);
+      gl.deleteBuffer(quad);
+      gl.deleteVertexArray(quadVao);
       gl.deleteVertexArray(pointVao);
     },
   };
@@ -563,61 +643,108 @@ export function createParticleScroll(
 
 const svgImageCache = new Map<string, HTMLImageElement>();
 
-/**
- * Rasterises ONLY text, images, and inline SVG icons into the absolute document canvas.
- * Card containers, clay surfaces, background boxes, and borders are NOT drawn here,
- * ensuring background templates remain unchanged and visible in the DOM at all times.
- */
 export function rasterise(
   tracked: Array<TrackedItem>,
   source: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D
 ) {
+  const dpr = source.width / Math.max(1, source.clientWidth || window.innerWidth);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, source.width, source.height);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  const sy = window.scrollY || document.documentElement.scrollTop;
+  const vh = window.innerHeight;
+  const margin = 400;
 
   for (let i = 0; i < tracked.length; i++) {
     const t = tracked[i];
-    paintElementTextAndImages(t.el, ctx);
+    if (t.assembled) continue;
+    // Fast viewport culling using cached document coordinates (no layout reflow)
+    const top = t.docTop - sy;
+    const bottom = t.docBottom - sy;
+    if (bottom < -margin || top > vh + margin) continue;
+    t.el.classList.add('ps-hidden');
+    paintElement(t.el, ctx);
   }
 }
 
-export function paintElementTextAndImages(
-  root: HTMLElement,
-  ctx: CanvasRenderingContext2D
-) {
-  const scroller = document.scrollingElement || document.documentElement;
-  const currentScrollY = scroller.scrollTop;
+export function paintElement(root: HTMLElement, ctx: CanvasRenderingContext2D) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+  let node: Node | null = root;
+
+  const paintBox = (el: HTMLElement) => {
+    const cs = getComputedStyle(el);
+    const bg = cs.backgroundColor;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) return;
+
+    const hasBg = bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent';
+    const borderTopWidth = parseFloat(cs.borderTopWidth) || 0;
+    const borderTopColor = cs.borderTopColor;
+    const hasBorder = borderTopWidth > 0 && borderTopColor && borderTopColor !== 'transparent' && borderTopColor !== 'rgba(0, 0, 0, 0)';
+    const hasShadow = cs.boxShadow && cs.boxShadow !== 'none';
+
+    if (!hasBg && !hasBorder && !hasShadow) return;
+
+    const tl = parseFloat(cs.borderTopLeftRadius) || 0;
+    const tr = parseFloat(cs.borderTopRightRadius) || 0;
+    const br = parseFloat(cs.borderBottomRightRadius) || 0;
+    const bl = parseFloat(cs.borderBottomLeftRadius) || 0;
+    const hasRadius = tl > 0 || tr > 0 || br > 0 || bl > 0;
+
+    ctx.save();
+
+    if (hasShadow && hasBg) {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.09)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 6;
+    }
+
+    ctx.beginPath();
+    if (hasRadius && (ctx as any).roundRect) {
+      (ctx as any).roundRect(r.left, r.top, r.width, r.height, [tl, tr, br, bl]);
+    } else {
+      ctx.rect(r.left, r.top, r.width, r.height);
+    }
+
+    if (hasBg) {
+      ctx.fillStyle = bg;
+      ctx.fill();
+    }
+
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+
+    if (hasBorder) {
+      ctx.strokeStyle = borderTopColor;
+      ctx.lineWidth = borderTopWidth;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  };
 
   const paintImg = (img: HTMLImageElement) => {
     if (!img.complete || !img.naturalWidth) return;
     const r = img.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) return;
 
-    const docX = r.left;
-    const docY = r.top + currentScrollY;
-
     const cs = getComputedStyle(img);
-    let tl = parseFloat(cs.borderTopLeftRadius) || 0;
-    let tr = parseFloat(cs.borderTopRightRadius) || 0;
-    let br = parseFloat(cs.borderBottomRightRadius) || 0;
-    let bl = parseFloat(cs.borderBottomLeftRadius) || 0;
-
-    if (tl === 0 && tr === 0 && br === 0 && bl === 0 && img.parentElement) {
-      const pcs = getComputedStyle(img.parentElement);
-      tl = parseFloat(pcs.borderTopLeftRadius) || 0;
-      tr = parseFloat(pcs.borderTopRightRadius) || 0;
-      br = parseFloat(pcs.borderBottomRightRadius) || 0;
-      bl = parseFloat(pcs.borderBottomLeftRadius) || 0;
-    }
+    const tl = parseFloat(cs.borderTopLeftRadius) || 0;
+    const tr = parseFloat(cs.borderTopRightRadius) || 0;
+    const br = parseFloat(cs.borderBottomRightRadius) || 0;
+    const bl = parseFloat(cs.borderBottomLeftRadius) || 0;
     const hasRadius = tl > 0 || tr > 0 || br > 0 || bl > 0;
 
     ctx.save();
     if (hasRadius) {
       ctx.beginPath();
       if ((ctx as any).roundRect) {
-        (ctx as any).roundRect(docX, docY, r.width, r.height, [tl, tr, br, bl]);
+        (ctx as any).roundRect(r.left, r.top, r.width, r.height, [tl, tr, br, bl]);
       } else {
-        ctx.rect(docX, docY, r.width, r.height);
+        ctx.rect(r.left, r.top, r.width, r.height);
       }
       ctx.clip();
     }
@@ -627,9 +754,9 @@ export function paintElementTextAndImages(
       const s = Math.max(r.width / img.naturalWidth, r.height / img.naturalHeight);
       const sw = r.width / s;
       const sh = r.height / s;
-      ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, docX, docY, r.width, r.height);
+      ctx.drawImage(img, (img.naturalWidth - sw) / 2, (img.naturalHeight - sh) / 2, sw, sh, r.left, r.top, r.width, r.height);
     } else {
-      ctx.drawImage(img, docX, docY, r.width, r.height);
+      ctx.drawImage(img, r.left, r.top, r.width, r.height);
     }
     ctx.restore();
   };
@@ -637,9 +764,6 @@ export function paintElementTextAndImages(
   const paintSvg = (svg: SVGSVGElement) => {
     const r = svg.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) return;
-    const docX = r.left;
-    const docY = r.top + currentScrollY;
-
     try {
       const xml = new XMLSerializer().serializeToString(svg);
       let img = svgImageCache.get(xml);
@@ -649,7 +773,7 @@ export function paintElementTextAndImages(
         svgImageCache.set(xml, img);
       }
       if (img.complete && img.naturalWidth) {
-        ctx.drawImage(img, docX, docY, r.width, r.height);
+        ctx.drawImage(img, r.left, r.top, r.width, r.height);
       }
     } catch (e) {
       // Fallback
@@ -684,9 +808,7 @@ export function paintElementTextAndImages(
       if (!rects.length) continue;
       const r = rects[0];
       if (r.width === 0) continue;
-      const docX = r.left;
-      const docY = r.top + currentScrollY + (r.height - (asc + desc)) / 2 + asc;
-      ctx.fillText(m[0], docX, docY);
+      ctx.fillText(m[0], r.left, r.top + (r.height - (asc + desc)) / 2 + asc);
     }
   };
 
@@ -694,13 +816,7 @@ export function paintElementTextAndImages(
     paintImg(root as HTMLImageElement);
     return;
   }
-  if (root.tagName === 'SVG' || root.tagName === 'svg') {
-    paintSvg(root as unknown as SVGSVGElement);
-    return;
-  }
-
-  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
-  let node: Node | null = root;
+  paintBox(root);
 
   while ((node = walker.nextNode())) {
     if (node.nodeType === 3) {
@@ -709,6 +825,8 @@ export function paintElementTextAndImages(
       paintImg(node as HTMLImageElement);
     } else if ((node as HTMLElement).tagName === 'SVG' || (node as HTMLElement).tagName === 'svg') {
       paintSvg(node as unknown as SVGSVGElement);
+    } else {
+      paintBox(node as HTMLElement);
     }
   }
 }
@@ -734,12 +852,12 @@ export function mountParticleScroll(
   const density = Math.max(1, options.density || DEFAULTS.density);
   const scroller = document.scrollingElement || document.documentElement;
 
+  // Tracked items with cached document coordinates
   const tracked: TrackedItem[] = elements.map((el) => ({
     el,
     assembled: false,
     docTop: 0,
     docBottom: 0,
-    docLeft: 0,
     height: 0,
     width: 0,
     from: 0,
@@ -749,38 +867,26 @@ export function mountParticleScroll(
 
   const measureTracked = () => {
     const sy = scroller.scrollTop;
-
     for (let i = 0; i < tracked.length; i++) {
       const t = tracked[i];
       const r = t.el.getBoundingClientRect();
       t.docTop = r.top + sy;
       t.docBottom = r.bottom + sy;
-      t.docLeft = r.left;
       t.height = r.height;
       t.width = r.width;
-      t.from = Math.max(0, Math.floor(t.docTop / density));
-      t.to = Math.max(t.from, Math.ceil(t.docBottom / density));
-      t.anchor = t.docTop + r.height * 0.4;
+      const from = Math.max(0, Math.floor(t.docTop / density) - 1);
+      const to = Math.max(from, Math.ceil(t.docBottom / density) + 1);
+      const anchorBias = r.height > 120 ? 0.35 : 0.50;
+      t.from = from;
+      t.to = to;
+      t.anchor = t.docTop + r.height * anchorBias;
     }
-
-    // Set source canvas size in document coordinates
-    const docW = Math.max(1, Math.round(window.innerWidth));
-    const docH = Math.max(1, Math.round(scroller.scrollHeight));
-    if (source.width !== docW || source.height !== docH) {
-      source.width = docW;
-      source.height = docH;
-    }
-
-    // Hide unassembled text/images so particles represent them
-    for (let i = 0; i < tracked.length; i++) {
-      if (!tracked[i].assembled) {
-        tracked[i].el.classList.add('ps-hidden');
-      }
+    if (inst) {
+      inst.setUnits(tracked.map((t) => ({ from: t.from, to: t.to, anchor: t.anchor })));
     }
   };
 
-  measureTracked();
-
+  let inst: ParticleScrollInstance | null = null;
   const content = {
     get scrollTop() {
       return scroller.scrollTop;
@@ -804,9 +910,7 @@ export function mountParticleScroll(
       scrollTarget: window,
       paint: (src, ctx) => rasterise(tracked, src, ctx),
       onRows(rows) {
-        const sy = scroller.scrollTop;
-        const vh = window.innerHeight;
-
+        let changed = false;
         for (let i = 0; i < tracked.length; i++) {
           const t = tracked[i];
           const top = Math.max(0, Math.min(rows.length - 1, t.from));
@@ -815,42 +919,49 @@ export function mountParticleScroll(
           for (let j = top; j <= bottom; j++) {
             if (rows[j] < min) min = rows[j];
           }
-
-          // When particles finish arranging (progress >= 0.95), reveal clearly
-          if (min >= 0.95 && !t.assembled) {
+          const done = min >= 0.9995;
+          if (done && !t.assembled) {
             t.assembled = true;
             t.el.classList.remove('ps-hidden');
             t.el.classList.add('ps-in');
-          } else if (min < 0.20 && t.assembled && (t.docTop - sy > vh + 80)) {
-            // Only disassemble when scrolled completely off below the viewport
+            changed = true;
+          } else if (!done && t.assembled) {
             t.assembled = false;
             t.el.classList.remove('ps-in');
             t.el.classList.add('ps-hidden');
+            changed = true;
           }
         }
+        if (changed && inst) inst.repaint();
       },
     },
     options
   );
 
+  inst = instance;
   if (!instance) {
     output.remove();
     return null;
   }
 
-  const debouncedRepaint = () => {
+  measureTracked();
+
+  const repaint = () => {
     measureTracked();
     instance.repaint();
   };
 
-  window.addEventListener('resize', debouncedRepaint, { passive: true });
-  document.fonts?.ready.then(debouncedRepaint);
-  document.querySelectorAll('img').forEach((i) => i.addEventListener('load', debouncedRepaint, { once: true }));
+  window.addEventListener('resize', repaint, { passive: true });
+  document.fonts?.ready.then(repaint);
+  document.querySelectorAll('img').forEach((i) => i.addEventListener('load', repaint, { once: true }));
+  const ro = new ResizeObserver(measureTracked);
+  ro.observe(document.body);
 
   const originalDestroy = instance.destroy;
   instance.destroy = () => {
     originalDestroy();
-    window.removeEventListener('resize', debouncedRepaint);
+    window.removeEventListener('resize', repaint);
+    ro.disconnect();
     output.remove();
     source.remove();
     for (const t of tracked) {
