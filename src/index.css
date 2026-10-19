@@ -1,0 +1,249 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Syne", system-ui, -apple-system, sans-serif;
+  --font-poster: "Anton", "Syne", system-ui, -apple-system, sans-serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100%;
+    -webkit-overflow-scrolling: touch;
+    background-color: #070709;
+  }
+  
+  body {
+    font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+    background-color: #070709;
+    color: #f4f4f5;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100%;
+    -webkit-overflow-scrolling: touch;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: "Syne", system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.04em;
+  }
+
+  code, kbd, samp, pre, .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CINEMATIC DARK MODE DESIGN SYSTEM
+   Deep obsidian surfaces with subtle rim highlights,
+   crimson magma glow accents, and tactile depth
+   ───────────────────────────────────────────────────────────── */
+
+/* Level 1: Primary Dark Surface */
+.clay-surface {
+  background: linear-gradient(145deg, rgba(22, 22, 26, 0.75) 0%, rgba(13, 13, 16, 0.9) 100%);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 16px 36px -8px rgba(0, 0, 0, 0.65),
+    0 4px 14px -2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 3px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Level 2: Elevated Dark Card (Projects, Highlights) */
+.clay-card {
+  background: linear-gradient(145deg, rgba(24, 24, 29, 0.7) 0%, rgba(14, 14, 18, 0.85) 100%);
+  border-radius: 1.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 
+    0 22px 45px -10px rgba(0, 0, 0, 0.75),
+    0 6px 18px -3px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 5px 0 rgba(0, 0, 0, 0.6);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+}
+
+.clay-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(223, 80, 53, 0.3);
+  box-shadow: 
+    0 28px 55px -10px rgba(0, 0, 0, 0.85),
+    0 10px 24px -4px rgba(223, 80, 53, 0.15),
+    inset 0 1px 3px 0 rgba(255, 255, 255, 0.16);
+}
+
+/* Level 3: Tactile Dark Interactive Button (Neutral) */
+.clay-btn {
+  background: linear-gradient(145deg, rgba(35, 35, 41, 0.85) 0%, rgba(20, 20, 24, 0.95) 100%);
+  color: #e4e4e7 !important;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 20px -3px rgba(0, 0, 0, 0.5),
+    0 3px 8px -1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.12);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-btn:hover {
+  transform: translateY(-1.5px);
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 
+    0 12px 24px -4px rgba(0, 0, 0, 0.6),
+    0 4px 10px -2px rgba(255, 255, 255, 0.05),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.18);
+}
+
+.clay-btn:active {
+  transform: translateY(1px);
+  box-shadow: 
+    0 3px 8px -2px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* Level 3b: Accent Crimson Glowing Button */
+.clay-btn-accent {
+  background: linear-gradient(135deg, #df5035 0%, #b83822 100%);
+  color: #ffffff !important;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 0 28px rgba(223, 80, 53, 0.45),
+    0 10px 24px -4px rgba(223, 80, 53, 0.5),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -2px 4px 0 rgba(100, 20, 10, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.clay-btn-accent:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 
+    0 0 38px rgba(223, 80, 53, 0.65),
+    0 14px 28px -4px rgba(223, 80, 53, 0.6),
+    inset 0 1px 3px 0 rgba(255, 255, 255, 0.5);
+}
+
+.clay-btn-accent:active {
+  transform: translateY(1px);
+  box-shadow: 
+    0 0 18px rgba(223, 80, 53, 0.35),
+    0 4px 10px -2px rgba(223, 80, 53, 0.4),
+    inset 0 2px 5px 0 rgba(80, 15, 8, 0.6);
+}
+
+/* Level 4: Recessed Inset Well / Input */
+.clay-inset {
+  background: rgba(14, 14, 17, 0.85);
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 
+    inset 0 3px 7px 0 rgba(0, 0, 0, 0.7),
+    inset 0 -1px 2px 0 rgba(255, 255, 255, 0.04);
+}
+
+.clay-nav {
+  background: rgba(11, 11, 14, 0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.7);
+}
+
+/* Subtle organic chip */
+.clay-chip {
+  background: rgba(22, 22, 26, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  box-shadow: 
+    0 4px 10px -2px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Custom dark scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+/* ThreeUI Particle Scroll (Canvas UI) */
+#ps-output {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 40;
+}
+.ps-hidden {
+  visibility: hidden !important;
+}
+.ps-in {
+  visibility: visible;
+  transition: opacity 0.25s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-hidden {
+    visibility: visible !important;
+  }
+}
+
+/* Text balance and grain utilities */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Minimal fine hairline divider */
+.hairline-b {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+.hairline-t {
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.hairline-r {
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+}
+.hairline-l {
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ThreeUI UplinkLoader Integration & Layering */
+.shader-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+  z-index: 10;
+}
+
+.uplink-loader {
+  background: transparent !important;
+}
+
+.uplink-loader iframe {
+  mix-blend-mode: screen;
+  background: transparent !important;
+  filter: hue-rotate(222deg) saturate(1.85) contrast(1.12);
+}

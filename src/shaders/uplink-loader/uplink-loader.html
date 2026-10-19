@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Uplink Sequence</title>
+<style>
+  :root {
+    --bg-track: #121114;
+    --tick-idle: rgba(255, 255, 255, 0.16);
+    --tick-active: #ffffff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Fullscreen Center Container ── */
+  .scene {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Tactile Clay Progress Bar Track ── */
+  .bar {
+    position: relative;
+    width: 100%;
+    height: 52px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 3px;
+    padding: 8px 14px;
+    background: var(--bg-track);
+    border-radius: 26px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 3px 8px rgba(0, 0, 0, 0.8),
+      inset 0 -1px 2px rgba(255, 255, 255, 0.12),
+      0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  /* ── Tactile Skewed Clay Ticks ── */
+  .tick {
+    flex: 1;
+    max-width: 9.5px;
+    height: 28px;
+    background: var(--tick-idle);
+    border-radius: 3.5px;
+    transform: skewX(-12deg);
+    transition: background 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  }
+
+  .tick.mk {
+    height: 36px;
+    background: rgba(255, 255, 255, 0.22);
+  }
+
+  .tick.on {
+    background: var(--tick-active);
+    box-shadow:
+      0 0 10px rgba(255, 255, 255, 0.85),
+      0 0 3px #ffffff,
+      0 2px 4px rgba(0, 0, 0, 0.5);
+    transform: skewX(-12deg) scaleY(1.05);
+  }
+
+  .tick.flash {
+    animation: ignite 0.25s ease-out;
+  }
+
+  @keyframes ignite {
+    0% {
+      background: #ffffff;
+      box-shadow:
+        0 0 18px rgba(255, 255, 255, 1),
+        0 0 32px rgba(255, 255, 255, 0.9);
+      transform: skewX(-12deg) scaleY(1.12);
+    }
+    100% {
+      background: #ffffff;
+      box-shadow:
+        0 0 10px rgba(255, 255, 255, 0.85),
+        0 0 3px #ffffff,
+        0 2px 4px rgba(0, 0, 0, 0.5);
+      transform: skewX(-12deg) scaleY(1.05);
+    }
+  }
+
+  /* Hide all telemetry, labels, plates, scanlines, and status text */
+  .plate, .brk, .readout, .barlabel, .status, .haze, .marker, .rail, .pool, .scan, .grain {
+    display: none !important;
+  }
+</style>
+</head>
+<body>
+  <div class="scene">
+    <div class="stage" id="stage">
+      <div class="bar" id="bar"></div>
+      <div id="plate"></div>
+      <div id="haze"></div>
+      <div class="readout"><b id="num">0</b></div>
+      <div class="status"></div>
+      <div id="dots"></div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const TICKS = 56, MARK_EVERY = 8;
+
+  /* ---- bar ---- */
+  const bar = document.getElementById('bar'), ticks = [];
+  for (let i = 0; i < TICKS; i++){
+    const t = document.createElement('i');
+    t.className = 'tick' + ((i + 1) % MARK_EVERY === 0 ? ' mk' : '');
+    bar.appendChild(t);
+    ticks.push(t);
+  }
+
+  /* ---- progress timeline (real keyframes, tuned smoothly to ~6-7 seconds) ---- */
+  const KF = [
+    [0,0],[0.045,9],[0.115,9.6],[0.16,22],[0.205,23],[0.30,38],[0.345,39.5],
+    [0.40,53],[0.475,54],[0.545,68],[0.60,69],[0.665,81],[0.735,82],
+    [0.80,92],[0.855,93],[0.925,99],[0.985,99.4],[1.0,100]
+  ];
+  const RUN = 6000, HOLD = 1600, BLANK = 420, LOOP = RUN + HOLD + BLANK;
+  const easeOut = x => 1 - Math.pow(1 - x, 2.1);
+  const valueAt = u => {
+    if (u >= 1) return 100;
+    for (let i = 0; i < KF.length - 1; i++){
+      const [t0,v0] = KF[i], [t1,v1] = KF[i+1];
+      if (u <= t1) return v0 + (v1 - v0) * easeOut((u - t0) / (t1 - t0));
+    }
+    return 100;
+  };
+
+  const PHASES = [
+    [0,  'INITIALIZING'],
+    [24, 'ESTABLISHING LINK'],
+    [52, 'SYNCHRONIZING'],
+    [78, 'FINALIZING'],
+    [100,'LOCKED']
+  ];
+  const phaseFor = p => { let t = PHASES[0][1]; for (const [k,v] of PHASES) if (p >= k) t = v; return t; };
+
+  const num   = document.getElementById('num');
+  const plate = document.getElementById('plate');
+
+  const FREEZE = new URLSearchParams(location.search).get('p');
+
+  let start = performance.now();
+  let lastLit = -1, lastPct = -1, lastPhase = '';
+  let completedFired = false;
+
+  function frame(now){
+    const e = (now - start) % LOOP;
+
+    let pct;
+    if (completedFired) {
+      pct = 100;
+    } else if (e < RUN) {
+      pct = valueAt(e / RUN);
+    } else {
+      pct = 100;
+    }
+    if (FREEZE !== null){ pct = +FREEZE; }
+
+    const shown = Math.round(pct);
+    if (shown !== lastPct){
+      if (num) num.textContent = String(shown);
+      lastPct = shown;
+      const ph = phaseFor(shown);
+      if (ph !== lastPhase){ lastPhase = ph; }
+      try {
+        window.parent.postMessage({ type: 'uplink-progress', progress: shown, phase: ph }, '*');
+      } catch(err) {}
+    }
+
+    const lit = Math.round(pct / 100 * TICKS);
+    if (lit !== lastLit){
+      for (let i = 0; i < TICKS; i++){
+        const on = i < lit;
+        if (ticks[i].classList.contains('on') !== on) ticks[i].classList.toggle('on', on);
+      }
+      if (lit > lastLit && lastLit >= 0 && lit > 0){
+        const h = ticks[lit - 1];
+        h.classList.remove('flash'); void h.offsetWidth; h.classList.add('flash');
+      }
+
+      if (lit === TICKS){
+        if (plate) {
+          plate.classList.remove('hit'); void plate.offsetWidth; plate.classList.add('hit');
+        }
+        if (!completedFired) {
+          completedFired = true;
+          // Uplink reaches 100% and signals completion
+          setTimeout(() => {
+            try {
+              window.parent.postMessage({ type: 'uplink-complete', progress: 100 }, '*');
+            } catch(err) {}
+          }, 400);
+        }
+      }
+      lastLit = lit;
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
